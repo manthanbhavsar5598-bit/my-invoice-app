@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Trash2, Plus } from "lucide-react";
 import ClientPicker from "./ClientPicker";
-import { uid, todayISO, addDays, invoiceNumberForProfile, computeTotals, money, isCommissionInvoice, BILL_TYPES } from "../utils/helpers";
+import { uid, todayISO, addDays, computeTotals, money, isCommissionInvoice, BILL_TYPES } from "../utils/helpers";
 
 function blankLine() {
   return { id: uid("li"), description: "", hsnCode: "", qty: "", unit: "", price: "", date: todayISO(), partyName: "", weight: "", commission: "", amount: 0 };
@@ -43,14 +43,9 @@ export default function InvoiceForm({ data, onSave }) {
     setInv(existing ? { ...blankInvoice(), ...existing } : blankInvoice());
   }, [id]);
 
-  useEffect(() => {
-    if (isNew) {
-      setInv((cur) => ({ ...cur, number: invoiceNumberForProfile(data, cur.companyProfileId) }));
-    }
-  }, [inv.companyProfileId, isNew, data]);
-
   const totals = computeTotals(inv);
-  const symbol = data.business.currencySymbol;
+  const selectedProfile = data.profiles.find((p) => p.id === inv.companyProfileId);
+  const symbol = selectedProfile?.currencySymbol || data.settings.currencySymbol;
 
   function updateLine(lineId, patch) {
     setInv({ ...inv, lineItems: inv.lineItems.map((li) => (li.id === lineId ? { ...li, ...patch } : li)) });
@@ -71,6 +66,7 @@ export default function InvoiceForm({ data, onSave }) {
   }
 
   function handleSave() {
+    if (!inv.companyProfileId) { alert("Pick a company profile first."); return; }
     if (!inv.clientId) { alert("Pick a client first."); return; }
     onSave(inv, isNew);
   }
@@ -102,8 +98,8 @@ export default function InvoiceForm({ data, onSave }) {
         <div style={{ marginBottom: 12 }}>
           <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Company profile</label>
           <select value={inv.companyProfileId} onChange={(e) => setInv({ ...inv, companyProfileId: e.target.value })}>
-            <option value="">{data.business.name} (primary)</option>
-            {data.businessProfiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            <option value="">Select a company profile…</option>
+            {data.profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
         <div>
@@ -116,8 +112,8 @@ export default function InvoiceForm({ data, onSave }) {
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: "var(--ink-soft)" }}>Header</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
           <div>
-            <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Invoice no <span style={{ color: "var(--stamp-red)" }}>*</span></label>
-            <input className="lg-mono" value={inv.number} onChange={(e) => setInv({ ...inv, number: e.target.value })} />
+            <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Invoice no <span style={{ fontWeight: 400 }}>— entered manually</span></label>
+            <input className="lg-mono" placeholder="e.g. INV-1001" value={inv.number} onChange={(e) => setInv({ ...inv, number: e.target.value })} />
           </div>
           <div>
             <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Date <span style={{ color: "var(--stamp-red)" }}>*</span></label>

@@ -12,7 +12,10 @@ export default function Invoices({ data, clientsById, onDelete, onSetStatus, onS
   const [printInvoiceId, setPrintInvoiceId] = useState(null);
 
   const printInvoice = printInvoiceId ? data.invoices.find((i) => i.id === printInvoiceId) : null;
-  const printBusiness = printInvoice ? resolveProfile(data.business, data.businessProfiles, printInvoice.companyProfileId) : data.business;
+  // No "primary" fallback — if no profile is resolved, PrintView gets an
+  // empty object and shows blanks rather than defaulting to some business identity.
+  const printProfile = printInvoice ? resolveProfile(data.profiles, printInvoice.companyProfileId) : {};
+  const printBusiness = { currencySymbol: data.settings.currencySymbol, ...printProfile };
 
   if (printInvoice) {
     return <PrintView invoice={printInvoice} business={printBusiness} client={clientsById[printInvoice.clientId]} onClose={() => setPrintInvoiceId(null)} />;

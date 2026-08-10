@@ -10,7 +10,7 @@ function blankRecurring() {
 export default function Recurring({ data, clientsById, onSave, onDelete, onGenerate }) {
   const [editingId, setEditingId] = useState(null);
   const editing = editingId === "new" ? blankRecurring() : data.recurring.find((r) => r.id === editingId);
-  const symbol = data.business.currencySymbol;
+  const symbol = data.settings.currencySymbol;
 
   const handleSave = (r) => {
     onSave(r, editingId === "new");

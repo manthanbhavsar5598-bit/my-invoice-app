@@ -19,7 +19,7 @@ import { todayISO, displayStatus, computeTotals, money, fmtDate } from "../utils
 
 export default function Dashboard({ data, clientsById }) {
   const navigate = useNavigate();
-  const symbol = data.business.currencySymbol;
+  const symbol = data.settings.currencySymbol;
   
   const outstanding = data.invoices.filter((i) => displayStatus(i) === "sent" || displayStatus(i) === "overdue");
   const outstandingTotal = outstanding.reduce((s, i) => s + computeTotals(i).total, 0);
@@ -63,7 +63,7 @@ export default function Dashboard({ data, clientsById }) {
             <span style={{ fontSize: 13, color: "var(--ink-soft)" }}>{today}</span>
           </div>
           <h1 className="lg-display" style={{ fontSize: 32, fontWeight: 700, margin: 0, color: "var(--ink)" }}>
-            {data.business.name || "Dashboard"}
+            Dashboard
           </h1>
         </div>
         

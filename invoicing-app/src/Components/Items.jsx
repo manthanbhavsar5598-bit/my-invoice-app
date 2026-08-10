@@ -3,13 +3,13 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import EntityForm from "./EntityForm";
 import { uid, money } from "../utils/helpers";
 
-export default function Items({ items, business, onSave, onDelete }) {
+export default function Items({ items, settings, onSave, onDelete }) {
   const [editingId, setEditingId] = useState(null);
   const editing = editingId === "new"
     ? { id: uid("it"), name: "", description: "", price: 0, unit: "", hsnCode: "" }
     : items.find((i) => i.id === editingId);
 
-  const symbol = business.currencySymbol;
+  const symbol = settings.currencySymbol;
 
   const handleSave = (item) => {
     onSave(item);

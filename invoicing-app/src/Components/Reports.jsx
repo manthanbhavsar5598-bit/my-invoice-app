@@ -12,7 +12,7 @@ const TAB_TYPES = [
 ];
 
 export default function Reports({ data, clientsById, profiles = [] }) {
-  const symbol = data.business.currencySymbol;
+  const symbol = data.settings.currencySymbol;
 
   // Navigation tab state
   const [activeTab, setActiveTab] = useState("sales");
@@ -35,25 +35,18 @@ export default function Reports({ data, clientsById, profiles = [] }) {
     billType: "all",
   });
 
-  // Combine primary business profile and secondary company profiles into a single list
+  // Company profiles for the filter dropdown - no "primary" entry, just
+  // whatever profiles the user has created.
   const companyProfilesList = useMemo(() => {
+    const source = profiles.length > 0 ? profiles : (data.profiles || []);
     const list = [];
-    
-    // Add primary business profile if present
-    if (data.business && data.business.name) {
-      list.push({ id: "primary", name: data.business.name, isPrimary: true });
-    }
-
-    // Add additional company profiles from props or data
-    const additionalProfiles = profiles.length > 0 ? profiles : (data.companyProfiles || []);
-    additionalProfiles.forEach((p) => {
+    source.forEach((p) => {
       if (p.name && !list.some((item) => item.name === p.name)) {
-        list.push({ id: p.id, name: p.name, isPrimary: false });
+        list.push({ id: p.id, name: p.name });
       }
     });
-
     return list;
-  }, [data.business, data.companyProfiles, profiles]);
+  }, [data.profiles, profiles]);
 
   const handleApply = (e) => {
     e.preventDefault();
@@ -82,7 +75,8 @@ export default function Reports({ data, clientsById, profiles = [] }) {
 
       // Company profile filter
       if (appliedFilters.company !== "all") {
-        const invoiceCompany = inv.businessName || inv.companyName || data.business?.name;
+        const profile = (data.profiles || []).find((p) => p.id === inv.companyProfileId);
+        const invoiceCompany = inv.businessName || inv.companyName || profile?.name;
         if (invoiceCompany !== appliedFilters.company) return false;
       }
 
@@ -97,7 +91,7 @@ export default function Reports({ data, clientsById, profiles = [] }) {
 
       return true;
     });
-  }, [data.invoices, data.business, activeTab, appliedFilters]);
+  }, [data.invoices, data.profiles, activeTab, appliedFilters]);
 
   // Aggregate totals
   const totalRevenue = useMemo(() => {
@@ -226,7 +220,7 @@ export default function Reports({ data, clientsById, profiles = [] }) {
               <option value="all">All Companies</option>
               {companyProfilesList.map((comp) => (
                 <option key={comp.id} value={comp.name}>
-                  {comp.name} {comp.isPrimary ? "(Primary)" : ""}
+                  {comp.name}
                 </option>
               ))}
             </select>
@@ -307,8 +301,8 @@ export default function Reports({ data, clientsById, profiles = [] }) {
               }}
             >
               <option value="all">All Types</option>
-              <option value="taxInvoice">Tax Invoice</option>
-              <option value="commission">Commission Invoice</option>
+              <option value="Tax Invoice">Tax Invoice</option>
+              <option value="Commission Invoice">Commission Invoice</option>
             </select>
           </div>
         </div>
@@ -386,7 +380,8 @@ export default function Reports({ data, clientsById, profiles = [] }) {
                 {filteredInvoices.map((inv) => {
                   const clientName = clientsById[inv.clientId]?.name || "Deleted Customer";
                   const status = displayStatus(inv);
-                  const companyName = inv.businessName || inv.companyName || data.business?.name;
+                  const invProfile = (data.profiles || []).find((p) => p.id === inv.companyProfileId);
+                  const companyName = inv.businessName || inv.companyName || invProfile?.name;
 
                   return (
                     <tr key={inv.id} style={{ borderBottom: "1px solid #F3F4F6", fontSize: 13 }}>

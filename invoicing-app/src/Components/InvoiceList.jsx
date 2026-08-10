@@ -4,7 +4,7 @@ import Stamp from "./Stamp";
 import { displayStatus, computeTotals, fmtDate, money } from "../utils/helpers";
 
 export default function InvoiceList({ data, clientsById, filter, setFilter, search, setSearch, onNew, onOpen, onPrint, onDelete, onSetStatus }) {
-  const symbol = data.business.currencySymbol;
+  const symbol = data.settings.currencySymbol;
   let list = data.invoices;
   if (filter !== "all") list = list.filter((i) => displayStatus(i) === filter);
   if (search.trim()) {

@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import EntityForm from "./EntityForm";
 import { uid } from "../utils/helpers";
 
-export default function CompanyProfiles({ business, profiles, onSave, onDelete }) {
-  const navigate = useNavigate();
+export default function CompanyProfiles({ profiles, onSave, onDelete }) {
   const [editingProfileId, setEditingProfileId] = useState(null);
 
   const editingProfile = editingProfileId === "new"
-    ? { id: uid("biz"), name: "", email: "", phone: "", address: "", gstNumber: "", prefix: "INV", nextNumber: 1001, bankName: "", branchName: "", accountNo: "", ifscCode: "" }
+    ? { id: uid("biz"), name: "", email: "", phone: "", address: "", gstNumber: "", currencySymbol: "₹", bankName: "", branchName: "", accountNo: "", ifscCode: "", terms: "" }
     : profiles.find((p) => p.id === editingProfileId);
 
   const handleSave = (p) => {
-    onSave({ ...p, nextNumber: Number(p.nextNumber) });
+    onSave(p);
     setEditingProfileId(null);
   };
 
@@ -24,7 +22,7 @@ export default function CompanyProfiles({ business, profiles, onSave, onDelete }
         <button className="lg-btn" onClick={() => setEditingProfileId("new")}><Plus size={15} /> Add profile</button>
       </div>
       <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 18, maxWidth: 560 }}>
-        If you bill under more than one business name, add each profile here. When creating a new invoice you'll get to pick which one it's issued from — its own name, contact details, and invoice numbering.
+        Add a profile for each business name you bill under. There's no "primary" profile — you pick which one to use every time you create an invoice.
       </div>
 
       {editingProfile && (
@@ -36,13 +34,13 @@ export default function CompanyProfiles({ business, profiles, onSave, onDelete }
             { key: "email", label: "Email", type: "email" },
             { key: "phone", label: "Phone" },
             { key: "gstNumber", label: "GST number" },
+            { key: "currencySymbol", label: "Currency symbol" },
             { key: "address", label: "Address", type: "textarea" },
-            { key: "prefix", label: "Invoice prefix" },
-            { key: "nextNumber", label: "Next number", type: "number" },
             { key: "bankName", label: "Bank name" },
             { key: "branchName", label: "Branch name" },
             { key: "accountNo", label: "Account no" },
             { key: "ifscCode", label: "IFSC code" },
+            { key: "terms", label: "Terms & conditions (one per line)", type: "textarea" },
           ]}
           onSave={handleSave}
           onCancel={() => setEditingProfileId(null)}
@@ -52,24 +50,16 @@ export default function CompanyProfiles({ business, profiles, onSave, onDelete }
       <div className="lg-card" style={{ padding: 0 }}>
         <table className="lg-table">
           <thead>
-            <tr><th>Name</th><th>Email</th><th>Prefix</th><th>Bank</th><th>A/C no</th><th></th></tr>
+            <tr><th>Name</th><th>Email</th><th>Bank</th><th>A/C no</th><th></th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>{business.name} <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>(primary)</span></td>
-              <td>{business.email}</td>
-              <td className="lg-mono">{business.prefix}</td>
-              <td>{business.bankName || "—"}</td>
-              <td className="lg-mono">{business.accountNo || "—"}</td>
-              <td>
-                <button className="lg-btn-ghost" style={{ padding: "5px 8px" }} onClick={() => navigate("/settings")}><Pencil size={13} /></button>
-              </td>
-            </tr>
+            {profiles.length === 0 && (
+              <tr><td colSpan={5} style={{ color: "var(--ink-soft)" }}>No company profiles yet. Add one to start creating invoices.</td></tr>
+            )}
             {profiles.map((p) => (
               <tr key={p.id}>
                 <td>{p.name}</td>
                 <td>{p.email}</td>
-                <td className="lg-mono">{p.prefix}</td>
                 <td>{p.bankName || "—"}</td>
                 <td className="lg-mono">{p.accountNo || "—"}</td>
                 <td>

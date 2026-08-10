@@ -1,23 +1,9 @@
 export const STORAGE_KEY = "invoicing_data";
 
 export const DEFAULT_DATA = {
-  business: {
-    name: "Your Business",
-    email: "",
-    phone: "",
-    address: "",
-    gstNumber: "",
-    currencySymbol: "₹",
-    taxRate: 0,
-    prefix: "INV",
-    nextNumber: 1001,
-    bankName: "",
-    branchName: "",
-    accountNo: "",
-    ifscCode: "",
-    terms: "1. All payment should be made by cash/NEFT.\n2. Delivery immediate after receipt of payment.\n3. Interest @18% p.a. will be charged on overdue amounts.\n4. Goods once sold cannot be returned without prior approval.\n5. Subject to local jurisdiction.",
-  },
-  businessProfiles: [],
+  // App-level settings only — no company/business identity here.
+  settings: { sendEmailOnInvoiceCreate: true, currencySymbol: "₹" },
+  profiles: [],
   clients: [],
   items: [],
   invoices: [],
@@ -26,15 +12,11 @@ export const DEFAULT_DATA = {
 
 export const BILL_TYPES = ["Tax Invoice", "Commission Invoice"];
 
-export function resolveProfile(business, profiles, id) {
-  if (!id) return business;
-  const p = (profiles || []).find((x) => x.id === id);
-  return p ? { ...business, ...p } : business;
-}
-
-export function invoiceNumberForProfile(data, companyProfileId) {
-  const p = resolveProfile(data.business, data.businessProfiles, companyProfileId);
-  return `${p.prefix}-${p.nextNumber}`;
+// Looks up a Company Profile by id. There is no "primary" fallback — if a
+// profile isn't selected/found, callers get an empty object and should
+// prompt the user to pick one rather than silently defaulting.
+export function resolveProfile(profiles, id) {
+  return (profiles || []).find((x) => x.id === id) || {};
 }
 
 export function uid(p = "id") {

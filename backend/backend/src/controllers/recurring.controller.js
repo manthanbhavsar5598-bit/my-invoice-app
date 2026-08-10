@@ -1,6 +1,5 @@
 const Recurring = require('../models/Recurring');
 const Invoice = require('../models/Invoice');
-const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 
@@ -38,27 +37,32 @@ exports.deleteRecurring = catchAsync(async (req, res) => {
   res.status(204).json({ success: true, data: null });
 });
 
-// Generates a real invoice from a recurring template, bumps the owner's
-// invoice-number counter, and advances the template's nextDate.
+// Generates a real invoice from a recurring template and advances the
+// template's nextDate. The bill number is left blank for the user to fill
+// in manually (no auto-increment). Since this is a backend-only flow with
+// no frontend round trip, totals are computed once here, the same way the
+// frontend's computeTotals() would for a plain (non-commission) invoice.
 exports.generateInvoice = catchAsync(async (req, res) => {
   const recurring = await Recurring.findOne({ _id: req.params.id, owner: req.user.id });
   if (!recurring) throw new ApiError(404, 'Recurring template not found.');
 
-  const user = await User.findById(req.user.id);
-  const number = `${user.company.prefix}-${user.company.nextNumber}`;
-  user.company.nextNumber += 1;
-  await user.save({ validateBeforeSave: false });
-
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 15);
+
+  const subtotal = recurring.lineItems.reduce((sum, li) => sum + (li.qty || 0) * (li.price || 0), 0);
+  const taxAmount = (subtotal * (recurring.taxRate || 0)) / 100;
+  const total = subtotal + taxAmount;
 
   const invoice = await Invoice.create({
     owner: req.user.id,
     client: recurring.client,
-    number,
+    number: '',
     items: recurring.lineItems,
     taxRate: recurring.taxRate,
     notes: recurring.notes,
+    subtotal: +subtotal.toFixed(2),
+    taxAmount: +taxAmount.toFixed(2),
+    total: +total.toFixed(2),
     dueDate,
     status: 'draft'
   });

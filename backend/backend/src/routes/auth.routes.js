@@ -30,6 +30,27 @@ router.post(
 
 router.post('/logout', authController.logout);
 
+// Password reset — PIN based, no current password required. Available from
+// both the Login page and the Settings page (Settings page doesn't require
+// a session for this call, since the whole point is "I forgot it").
+router.post(
+  '/forgot-password',
+  authLimiter,
+  validate([body('email').isEmail().withMessage('Valid email is required').normalizeEmail()]),
+  authController.requestPasswordReset
+);
+
+router.post(
+  '/reset-password',
+  authLimiter,
+  validate([
+    body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+    body('pin').notEmpty().withMessage('PIN is required'),
+    body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
+  ]),
+  authController.resetPasswordWithPin
+);
+
 router.get('/me', protect, authController.getMe);
 router.patch('/update-me', protect, authController.updateMe);
 router.patch(

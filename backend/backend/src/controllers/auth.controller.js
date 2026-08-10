@@ -1,7 +1,13 @@
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const generateToken = require('../utils/generateToken');
+const sendEmail = require('../utils/sendEmail');
+
+// Only this account is permitted to use the password-reset flow.
+const RESET_ALLOWED_EMAIL = 'manthanbhavsar5598@gmail.com';
 
 const cookieOptions = () => ({
   expires: new Date(
@@ -26,12 +32,12 @@ const sendAuthResponse = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res) => {
-  const { name, email, password, company } = req.body;
+  const { name, email, password } = req.body;
 
   const existing = await User.findOne({ email });
   if (existing) throw new ApiError(409, 'An account with this email already exists.');
 
-  const user = await User.create({ name, email, password, company });
+  const user = await User.create({ name, email, password });
   sendAuthResponse(user, 201, res);
 });
 
@@ -55,18 +61,28 @@ exports.getMe = catchAsync(async (req, res) => {
   res.status(200).json({ success: true, data: { user: req.user } });
 });
 
+// User-level fields only (name + app settings). Company data never lives here.
 exports.updateMe = catchAsync(async (req, res) => {
-  const { name, company } = req.body;
+  const { name, settings } = req.body;
 
   const user = await User.findByIdAndUpdate(
     req.user.id,
-    { $set: { ...(name && { name }), ...(company && { company }) } },
+    {
+      $set: {
+        ...(name !== undefined && { name }),
+        ...(settings?.sendEmailOnInvoiceCreate !== undefined && {
+          'settings.sendEmailOnInvoiceCreate': settings.sendEmailOnInvoiceCreate
+        }),
+        ...(settings?.currencySymbol !== undefined && { 'settings.currencySymbol': settings.currencySymbol })
+      }
+    },
     { new: true, runValidators: true }
   );
 
   res.status(200).json({ success: true, data: { user } });
 });
 
+// Settings-page password change — still requires the current password.
 exports.updatePassword = catchAsync(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
@@ -76,6 +92,64 @@ exports.updatePassword = catchAsync(async (req, res) => {
   }
 
   user.password = newPassword;
+  await user.save();
+
+  sendAuthResponse(user, 200, res);
+});
+
+// --- PIN-based password reset (Login page + Settings page). No current password needed. ---
+
+// Step 1: user asks for a reset PIN. Only the single configured account is allowed.
+exports.requestPasswordReset = catchAsync(async (req, res) => {
+  const { email } = req.body;
+
+  if ((email || '').toLowerCase().trim() !== RESET_ALLOWED_EMAIL) {
+    throw new ApiError(403, 'Password reset is not available for this account.');
+  }
+
+  const user = await User.findOne({ email: RESET_ALLOWED_EMAIL });
+  if (!user) throw new ApiError(404, 'Account not found.');
+
+  const pin = String(crypto.randomInt(100000, 1000000)); // random 6-digit PIN
+  user.resetPinHash = await bcrypt.hash(pin, 10);
+  user.resetPinExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+  await user.save({ validateBeforeSave: false });
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: 'Your password reset PIN',
+      text: `Your password reset PIN is ${pin}. It expires in 15 minutes.`
+    });
+  } catch (err) {
+    user.resetPinHash = undefined;
+    user.resetPinExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    throw new ApiError(500, 'Could not send the reset PIN email. Please try again.');
+  }
+
+  res.status(200).json({ success: true, message: 'A reset PIN has been emailed to the account.' });
+});
+
+// Step 2: user submits the PIN + new password. Current password is never asked for.
+exports.resetPasswordWithPin = catchAsync(async (req, res) => {
+  const { email, pin, newPassword } = req.body;
+
+  if ((email || '').toLowerCase().trim() !== RESET_ALLOWED_EMAIL) {
+    throw new ApiError(403, 'Password reset is not available for this account.');
+  }
+
+  const user = await User.findOne({ email: RESET_ALLOWED_EMAIL }).select('+password +resetPinHash +resetPinExpires');
+  if (!user || !user.resetPinHash || !user.resetPinExpires || user.resetPinExpires < Date.now()) {
+    throw new ApiError(400, 'Reset PIN is invalid or has expired. Please request a new one.');
+  }
+
+  const pinMatches = await bcrypt.compare(String(pin || ''), user.resetPinHash);
+  if (!pinMatches) throw new ApiError(400, 'Incorrect PIN.');
+
+  user.password = newPassword;
+  user.resetPinHash = undefined;
+  user.resetPinExpires = undefined;
   await user.save();
 
   sendAuthResponse(user, 200, res);

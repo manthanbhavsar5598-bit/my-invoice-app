@@ -1,10 +1,12 @@
 const PDFDocument = require('pdfkit');
 
-// Builds a PDF for the given invoice + client + owner and resolves with a Buffer.
+// Builds a PDF for the given invoice + client + companyProfile and resolves
+// with a Buffer. companyProfile is the CompanyProfile the invoice was issued
+// under (selected on the Invoice Form) — never a "primary" fallback.
 // Keeping this stream-to-buffer (rather than writing to disk) keeps the API
 // stateless, which matters for horizontal scaling / ephemeral filesystems on
 // hosts like Render/Railway.
-const generateInvoicePDF = (invoice, client, owner) => {
+const generateInvoicePDF = (invoice, client, companyProfile) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
     const chunks = [];
@@ -15,11 +17,11 @@ const generateInvoicePDF = (invoice, client, owner) => {
 
     doc
       .fontSize(20)
-      .text(owner?.company?.name || owner?.name || 'Invoice', { align: 'left' })
+      .text(companyProfile?.name || 'Invoice', { align: 'left' })
       .fontSize(10)
       .fillColor('#555')
-      .text(owner?.company?.address || '')
-      .text(owner?.company?.phone || '')
+      .text(companyProfile?.address || '')
+      .text(companyProfile?.phone || '')
       .moveDown(1.5);
 
     doc

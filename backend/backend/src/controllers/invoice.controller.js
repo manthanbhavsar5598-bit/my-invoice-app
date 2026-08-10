@@ -10,16 +10,18 @@ const logger = require('../utils/logger');
 
 // Bill-creation notifications always go to these two fixed addresses,
 // regardless of who the invoice's client is.
-const BILL_NOTIFY_EMAILS = ['afafff12@gmail.com', 'moeada@gmail.com'];
+const BILL_NOTIFY_EMAILS = ['manthanbhavsar5598@gmail.com', 'nchem95@gmail.com'];
 
-const notifyBillCreated = async (invoice, client, owner) => {
+const notifyBillCreated = async (invoice, client, owner, companyProfile) => {
+  // Respect the Settings > "send email on invoice created" toggle at all times.
+  if (!owner?.settings?.sendEmailOnInvoiceCreate) return;
   try {
-    const pdfBuffer = await generateInvoicePDF(invoice, client, owner);
+    const pdfBuffer = await generateInvoicePDF(invoice, client, companyProfile);
     await sendEmail({
       to: BILL_NOTIFY_EMAILS.join(','),
-      subject: `New invoice created: ${invoice.number}`,
-      text: `A new invoice ${invoice.number} was created for ${client?.name || 'a client'}. Total: ${invoice.total}.`,
-      attachments: [{ filename: `${invoice.number}.pdf`, content: pdfBuffer }]
+      subject: `New invoice created: ${invoice.number || invoice._id}`,
+      text: `A new invoice ${invoice.number || ''} was created for ${client?.name || 'a client'}. Total: ${invoice.total}.`,
+      attachments: [{ filename: `${invoice.number || invoice._id}.pdf`, content: pdfBuffer }]
     });
   } catch (err) {
     logger.error(`Failed to send bill-creation notification: ${err.message}`);
@@ -36,24 +38,15 @@ exports.createInvoice = catchAsync(async (req, res) => {
     if (!companyProfile) throw new ApiError(404, 'Company profile not found.');
   }
 
-  // Bump the correct invoice-number counter (primary business or the
-  // selected company profile) so numbers stay sequential per entity.
-  const number = req.body.number || `INV-${Date.now()}`;
-  if (companyProfile) {
-    companyProfile.nextNumber += 1;
-    await companyProfile.save();
-  } else {
-    await User.findByIdAndUpdate(req.user.id, { $inc: { 'company.nextNumber': 1 } });
-  }
-
+  // Bill number is entered manually by the user — no generation, no
+  // uniqueness/format validation, no counter to bump.
   const invoice = await Invoice.create({
     ...req.body,
-    number,
     owner: req.user.id
   });
 
   const owner = await User.findById(req.user.id);
-  notifyBillCreated(invoice, client, owner); // fire-and-forget, doesn't block the response
+  notifyBillCreated(invoice, client, owner, companyProfile); // fire-and-forget, doesn't block the response
 
   res.status(201).json({ success: true, data: { invoice } });
 });
@@ -79,7 +72,7 @@ exports.updateInvoice = catchAsync(async (req, res) => {
 
   Object.assign(invoice, req.body);
   if (req.body.status === 'paid' && !invoice.paidDate) invoice.paidDate = new Date();
-  await invoice.save(); // triggers pre-save total recalculation
+  await invoice.save(); // no total recalculation happens here — totals come from the frontend as-is
 
   res.status(200).json({ success: true, data: { invoice } });
 });
@@ -94,11 +87,15 @@ exports.downloadInvoicePDF = catchAsync(async (req, res) => {
   const invoice = await Invoice.findOne({ _id: req.params.id, owner: req.user.id }).populate('client');
   if (!invoice) throw new ApiError(404, 'Invoice not found.');
 
-  const pdfBuffer = await generateInvoicePDF(invoice, invoice.client, req.user);
+  const companyProfile = invoice.companyProfile
+    ? await CompanyProfile.findOne({ _id: invoice.companyProfile, owner: req.user.id })
+    : null;
+
+  const pdfBuffer = await generateInvoicePDF(invoice, invoice.client, companyProfile);
 
   res.set({
     'Content-Type': 'application/pdf',
-    'Content-Disposition': `attachment; filename=${invoice.number}.pdf`,
+    'Content-Disposition': `attachment; filename=${invoice.number || invoice._id}.pdf`,
     'Content-Length': pdfBuffer.length
   });
   res.send(pdfBuffer);
@@ -108,14 +105,22 @@ exports.emailInvoice = catchAsync(async (req, res) => {
   const invoice = await Invoice.findOne({ _id: req.params.id, owner: req.user.id }).populate('client');
   if (!invoice) throw new ApiError(404, 'Invoice not found.');
 
-  const pdfBuffer = await generateInvoicePDF(invoice, invoice.client, req.user);
+  // Respect the Settings > "send email on invoice created" toggle at all times.
+  if (!req.user?.settings?.sendEmailOnInvoiceCreate) {
+    return res.status(200).json({ success: true, message: 'Email notifications are disabled in settings.', data: { invoice } });
+  }
 
-  // Bill notifications always go to the two fixed addresses only.
+  const companyProfile = invoice.companyProfile
+    ? await CompanyProfile.findOne({ _id: invoice.companyProfile, owner: req.user.id })
+    : null;
+
+  const pdfBuffer = await generateInvoicePDF(invoice, invoice.client, companyProfile);
+
   await sendEmail({
     to: BILL_NOTIFY_EMAILS.join(','),
-    subject: `Invoice ${invoice.number} from ${req.user.company?.name || req.user.name}`,
-    text: `Invoice ${invoice.number} for ${invoice.client?.name || 'client'}, total ${invoice.total}.`,
-    attachments: [{ filename: `${invoice.number}.pdf`, content: pdfBuffer }]
+    subject: `Invoice ${invoice.number || invoice._id} from ${companyProfile?.name || req.user.name || 'your business'}`,
+    text: `Invoice ${invoice.number || ''} for ${invoice.client?.name || 'client'}, total ${invoice.total}.`,
+    attachments: [{ filename: `${invoice.number || invoice._id}.pdf`, content: pdfBuffer }]
   });
 
   if (invoice.status === 'draft') {

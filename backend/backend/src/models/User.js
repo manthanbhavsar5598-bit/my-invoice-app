@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+// User is intentionally independent from CompanyProfile. It only owns
+// login/auth concerns and app-level settings — no company/business data.
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: [true, 'Name is required'], trim: true, maxlength: 100 },
+    name: { type: String, trim: true, maxlength: 100 },
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -13,25 +15,20 @@ const userSchema = new mongoose.Schema(
       match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
     },
     password: { type: String, required: [true, 'Password is required'], minlength: 8, select: false },
-    company: {
-      name: { type: String, trim: true, default: 'Your Business' },
-      email: { type: String, trim: true },
-      address: { type: String, trim: true },
-      phone: { type: String, trim: true },
-      logoUrl: { type: String, trim: true },
-      gstNumber: { type: String, trim: true },
-      currencySymbol: { type: String, trim: true, default: '₹' },
-      taxRate: { type: Number, default: 0 },
-      prefix: { type: String, trim: true, default: 'INV' },
-      nextNumber: { type: Number, default: 1001 },
-      bankName: { type: String, trim: true },
-      branchName: { type: String, trim: true },
-      accountNo: { type: String, trim: true },
-      ifscCode: { type: String, trim: true },
-      terms: { type: String, trim: true }
+
+    // App-level settings/preferences (not company data).
+    settings: {
+      // Controls whether an email goes out automatically when a bill/invoice is created.
+      sendEmailOnInvoiceCreate: { type: Boolean, default: true },
+      currencySymbol: { type: String, trim: true, default: '₹' }
     },
+
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+
+    // --- Password reset (PIN-based, no current password required) ---
+    resetPinHash: { type: String, select: false },
+    resetPinExpires: { type: Date, select: false }
   },
   { timestamps: true }
 );

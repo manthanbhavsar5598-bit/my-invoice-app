@@ -13,7 +13,6 @@ const clientRoutes = require('./routes/client.routes');
 const invoiceRoutes = require('./routes/invoice.routes');
 const itemRoutes = require('./routes/item.routes');
 const companyProfileRoutes = require('./routes/companyProfile.routes');
-const businessRoutes = require('./routes/business.routes');
 const recurringRoutes = require('./routes/recurring.routes');
 const { errorHandler, notFound } = require('./middleware/error.middleware');
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -79,7 +78,6 @@ app.use('/api/v1/clients', clientRoutes);
 app.use('/api/v1/invoices', invoiceRoutes);
 app.use('/api/v1/items', itemRoutes);
 app.use('/api/v1/company-profiles', companyProfileRoutes);
-app.use('/api/v1/business', businessRoutes);
 app.use('/api/v1/recurring', recurringRoutes);
 
 

@@ -5,14 +5,14 @@ import ClientPicker from "./ClientPicker";
 import { uid, todayISO, addDays, invoiceNumberForProfile, computeTotals, money, isCommissionInvoice, BILL_TYPES } from "../utils/helpers";
 
 function blankLine() {
-  return { id: uid("li"), description: "", hsnCode: "", qty: 1, unit: "", price: 0, date: todayISO(), partyName: "", weight: "", commission: "", amount: 0 };
+  return { id: uid("li"), description: "", hsnCode: "", qty: "", unit: "", price: "", date: todayISO(), partyName: "", weight: "", commission: "", amount: 0 };
 }
 
 function blankInvoice() {
   return {
     id: uid("inv"),
     number: "",
-    billType: "Invoice",
+    billType: "Tax Invoice",
     companyProfileId: "",
     stateType: "",
     clientId: "",
@@ -202,23 +202,23 @@ export default function InvoiceForm({ data, onSave }) {
                 <input placeholder="Party name" value={li.partyName} onChange={(e) => updateLine(li.id, { partyName: e.target.value })} />
                 <input type="number" min="0" step="0.01" placeholder="Weight" value={li.weight} onChange={(e) => updateLine(li.id, { weight: e.target.value })} />
                 <input type="number" min="0" step="0.01" placeholder="Rate" value={li.commission} onChange={(e) => updateLine(li.id, { commission: e.target.value })} />
-                <input className="lg-mono" disabled value={money((Number(li.weight) || 0) * (Number(li.commission) || 0), symbol)} />
+                <input className="lg-mono" disabled value={money(((Number(li.weight) || 0) * (Number(li.commission) || 0)).toFixed(2), symbol)} />
                 <button className="lg-btn-danger" style={{ padding: "6px 8px" }} onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>
               </div>
             ))}
           </>
         ) : (
           inv.lineItems.map((li) => (
-            <div key={li.id} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr 90px 60px 70px 90px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
+            <div key={li.id} style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr 90px 80px 70px 120px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
               <select onChange={(e) => e.target.value && pickCatalogItem(li.id, e.target.value)} defaultValue="">
                 <option value="">From catalog…</option>
                 {data.items.map((it) => <option key={it.id} value={it.id}>{it.name}</option>)}
               </select>
               <input placeholder="Description" value={li.description} onChange={(e) => updateLine(li.id, { description: e.target.value })} />
               <input placeholder="HSN/SAC" value={li.hsnCode} onChange={(e) => updateLine(li.id, { hsnCode: e.target.value })} />
-              <input type="number" min="0" step="1" placeholder="Qty" value={li.qty} onChange={(e) => updateLine(li.id, { qty: e.target.value })} />
+              <input type="number" min="0" step="1" placeholder="Qty" value={li.qty || ""} onChange={(e) => updateLine(li.id, { qty: e.target.value })} />
               <input placeholder="Unit" value={li.unit} onChange={(e) => updateLine(li.id, { unit: e.target.value })} />
-              <input type="number" min="0" step="0.01" placeholder="Rate" value={li.price} onChange={(e) => updateLine(li.id, { price: e.target.value })} />
+              <input type="number" min="0" step="0.01" placeholder="Rate" value={li.price || ""} onChange={(e) => updateLine(li.id, { price: e.target.value })} />
               <button className="lg-btn-danger" style={{ padding: "6px 8px" }} onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>
             </div>
           ))
@@ -237,13 +237,13 @@ export default function InvoiceForm({ data, onSave }) {
             <input type="number" style={{ width: 100 }} value={inv.taxRate} disabled />
           </div>
           <div className="lg-row-line" style={{ paddingBottom: 8, marginBottom: 8, fontSize: 13, display: "flex", justifyContent: "space-between" }}>
-            <span>Subtotal</span><span className="lg-mono">{money(totals.subtotal, symbol)}</span>
+            <span>Subtotal</span><span className="lg-mono">{money(totals.subtotal.toFixed(2), symbol)}</span>
           </div>
           <div style={{ fontSize: 13, display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span>{inv.stateType === "intra" ? `SGST 9% + CGST 9%` : inv.stateType === "inter" ? "IGST 18%" : "Tax"}</span><span className="lg-mono">{money(totals.taxAmount, symbol)}</span>
+            <span>{inv.stateType === "intra" ? `SGST 9% + CGST 9%` : inv.stateType === "inter" ? "IGST 18%" : "Tax"}</span><span className="lg-mono">{money(totals.taxAmount.toFixed(2), symbol)}</span>
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-            <span>Total</span><span className="lg-mono">{money(totals.total, symbol)}</span>
+            <span>Total</span><span className="lg-mono">{money(totals.total.toFixed(2), symbol)}</span>
           </div>
         </div>
       </div>

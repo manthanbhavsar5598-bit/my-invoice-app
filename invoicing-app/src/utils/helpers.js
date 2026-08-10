@@ -24,7 +24,7 @@ export const DEFAULT_DATA = {
   recurring: [],
 };
 
-export const BILL_TYPES = ["Invoice", "Tax Invoice", "Commission Invoice", "Quotation", "Proforma Invoice", "Credit Note", "Receipt"];
+export const BILL_TYPES = ["Tax Invoice", "Commission Invoice"];
 
 export function resolveProfile(business, profiles, id) {
   if (!id) return business;

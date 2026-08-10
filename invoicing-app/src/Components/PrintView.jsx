@@ -2,6 +2,17 @@ import React from "react";
 import { Printer, Download, ChevronLeft } from "lucide-react";
 import { computeTotals, isCommissionInvoice, invoiceTitleLabel, fmtDate, escapeHtml, money, amountInWords } from "../utils/helpers";
 
+// Helper to format ISO date strings (YYYY-MM-DD) into (DD/MM/YYYY) -> e.g., 10/06/2026
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const [year, month, day] = parts;
+    return `${day}/${month}/${year}`;
+  }
+  return dateStr;
+}
+
 function buildInvoiceHTML(invoice, business, client) {
   const totals = computeTotals(invoice);
   const symbol = business.currencySymbol;
@@ -20,7 +31,7 @@ function buildInvoiceHTML(invoice, business, client) {
   const itemHeaderRow = commission
     ? `<tr style="background:#F0DFC0;">
         <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;width:36px;">Sr.no</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;width:80px;">Date</th>
+        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;width:100px;white-space:nowrap;">Date</th>
         <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;text-align:left;">Party name</th>
         <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;width:80px;">Total weight</th>
         <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;width:90px;">Commission</th>
@@ -40,7 +51,7 @@ function buildInvoiceHTML(invoice, business, client) {
     ? rows.map((li, idx) => `
       <tr>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;text-align:center;">${idx + 1}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;text-align:center;">${fmtDate(li.date)}</td>
+        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;text-align:center;white-space:nowrap;">${formatDate(li.date)}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;">${escapeHtml(li.partyName)}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;text-align:center;">${escapeHtml(li.weight)}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;text-align:center;">${escapeHtml(li.commission)}</td>
@@ -170,17 +181,22 @@ function buildInvoiceHTML(invoice, business, client) {
 
     <div style="display:grid;grid-template-columns:1.4fr 1fr;">
       <div style="border-right:1px solid #1F2A3C;">
-        <div style="padding:8px 10px;font-size:12px;font-weight:700;border-bottom:1px solid #1F2A3C;">${escapeHtml(amountInWords(grandTotal, "Rupees"))}</div>
+        <!-- Amount in Words -->
+        <div style="padding:8px 10px;font-size:14px;font-weight:700;border-bottom:1px solid #1F2A3C;">${escapeHtml(amountInWords(grandTotal, "Rupees"))}</div>
+        
+        <!-- Bank Details -->
         <div style="padding:8px 10px;border-bottom:1px solid #1F2A3C;">
-          <div style="font-weight:700;font-size:12px;margin-bottom:4px;">Bank details</div>
-          <div style="font-size:11px;">Bank name: ${escapeHtml(business.bankName || "—")}</div>
-          <div style="font-size:11px;">Branch name: ${escapeHtml(business.branchName || "—")}</div>
-          <div style="font-size:11px;">A/C no: ${escapeHtml(business.accountNo || "—")}</div>
-          <div style="font-size:11px;">IFSC code: ${escapeHtml(business.ifscCode || "—")}</div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Bank details</div>
+          <div style="font-size:13px;">Bank name: ${escapeHtml(business.bankName || "—")}</div>
+          <div style="font-size:13px;">Branch name: ${escapeHtml(business.branchName || "—")}</div>
+          <div style="font-size:13px;">A/C no: ${escapeHtml(business.accountNo || "—")}</div>
+          <div style="font-size:13px;">IFSC code: ${escapeHtml(business.ifscCode || "—")}</div>
         </div>
+        
+        <!-- Terms & Conditions -->
         <div style="padding:8px 10px;">
-          <div style="font-weight:700;font-size:12px;margin-bottom:4px;">Terms &amp; conditions</div>
-          ${terms.map((t) => `<div style="font-size:10.5px;margin-bottom:2px;">${escapeHtml(t)}</div>`).join("")}
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Terms &amp; conditions</div>
+          ${terms.map((t) => `<div style="font-size:12.5px;margin-bottom:2px;">${escapeHtml(t)}</div>`).join("")}
         </div>
       </div>
       <div>
@@ -334,7 +350,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
             {isCommissionInvoice(invoice) ? (
               <tr style={{ background: "#F0DFC0" }}>
                 <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, width: 36 }}>Sr.no</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, width: 80 }}>Date</th>
+                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, width: 100, whiteSpace: "nowrap" }}>Date</th>
                 <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, textAlign: "left" }}>Party name</th>
                 <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, width: 80 }}>Total weight</th>
                 <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, width: 90 }}>Commission</th>
@@ -357,7 +373,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
               ? rows.map((li, idx) => (
                   <tr key={li.id || idx}>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, textAlign: "center" }}>{idx + 1}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, textAlign: "center" }}>{fmtDate(li.date)}</td>
+                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, textAlign: "center", whiteSpace: "nowrap" }}>{formatDate(li.date)}</td>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12 }}>{li.partyName}</td>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, textAlign: "center" }}>{li.weight}</td>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, textAlign: "center" }}>{li.commission}</td>
@@ -391,18 +407,25 @@ export default function PrintView({ invoice, business, client, onClose }) {
 
         <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr" }}>
           <div style={{ borderRight: "1px solid #1F2A3C" }}>
-            <div style={{ padding: "8px 10px", fontSize: 12, fontWeight: 700, borderBottom: "1px solid #1F2A3C" }}>{amountInWords(grandTotal, "Rupees")}</div>
-            <div style={{ padding: "8px 10px", borderBottom: "1px solid #1F2A3C" }}>
-              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>Bank details</div>
-              <div style={{ fontSize: 11 }}>Bank name: {business.bankName || "—"}</div>
-              <div style={{ fontSize: 11 }}>Branch name: {business.branchName || "—"}</div>
-              <div style={{ fontSize: 11 }}>A/C no: {business.accountNo || "—"}</div>
-              <div style={{ fontSize: 11 }}>IFSC code: {business.ifscCode || "—"}</div>
+            {/* Amount in Words */}
+            <div style={{ padding: "8px 10px", fontSize: 14, fontWeight: 700, borderBottom: "1px solid #1F2A3C" }}>
+              {amountInWords(grandTotal, "Rupees")}
             </div>
+
+            {/* Bank Details */}
+            <div style={{ padding: "8px 10px", borderBottom: "1px solid #1F2A3C" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Bank details</div>
+              <div style={{ fontSize: 13 }}>Bank name: {business.bankName || "—"}</div>
+              <div style={{ fontSize: 13 }}>Branch name: {business.branchName || "—"}</div>
+              <div style={{ fontSize: 13 }}>A/C no: {business.accountNo || "—"}</div>
+              <div style={{ fontSize: 13 }}>IFSC code: {business.ifscCode || "—"}</div>
+            </div>
+
+            {/* Terms & Conditions */}
             <div style={{ padding: "8px 10px" }}>
-              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>Terms & conditions</div>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Terms & conditions</div>
               {terms.map((t, idx) => (
-                <div key={idx} style={{ fontSize: 10.5, marginBottom: 2 }}>{t}</div>
+                <div key={idx} style={{ fontSize: 12.5, marginBottom: 2 }}>{t}</div>
               ))}
             </div>
           </div>

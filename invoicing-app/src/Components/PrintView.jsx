@@ -87,7 +87,7 @@ function buildInvoiceHTML(invoice, business, client) {
 <meta charset="utf-8">
 <title>${escapeHtml(invoice.number)}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
   * { box-sizing: border-box; }
   body { font-family: 'Inter', sans-serif; color: #1F2A3C; background: #fff; margin: 0; padding: 24px; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; }
@@ -107,10 +107,10 @@ function buildInvoiceHTML(invoice, business, client) {
     <div style="text-align:center;font-weight:700;font-size:13px;letter-spacing:0.06em;padding:6px 0;border-bottom:1px solid #1F2A3C;color:${commission ? "#C0392B" : "#1F2A3C"};">
       JAY SWAMINARAYAN
     </div>
-    <div style="background:#F0DFC0;border-bottom:1px solid #1F2A3C;padding:12px 16px;text-align:center;">
-      <span style="font-family:'Zilla Slab',serif;font-size:22px;font-weight:700;background:#FEF08A;padding:2px 12px;display:inline-block;">${escapeHtml(business.name)}</span>
-      <div style="font-size:11px;margin-top:6px;white-space:pre-line;">${escapeHtml(business.address)}</div>
-      <div style="font-size:11px;margin-top:2px;">
+    <div style="background:#fff;border-bottom:1px solid #1F2A3C;padding:12px 16px;text-align:center;">
+      <span style="font-family:'Zilla Slab',serif;font-size:22px;font-weight:700;background:transparent;padding:2px 12px;display:inline-block;">${escapeHtml(business.name)}</span>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:6px;white-space:pre-line;">${escapeHtml(business.address)}</div>
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:4px;">
         ${business.gstNumber ? `GSTIN: ${escapeHtml(business.gstNumber)}&nbsp;&nbsp;` : ""}
         ${business.phone ? `Tel: ${escapeHtml(business.phone)}&nbsp;&nbsp;` : ""}
         ${escapeHtml(business.email)}
@@ -261,10 +261,10 @@ export default function PrintView({ invoice, business, client, onClose }) {
           JAY SWAMINARAYAN
         </div>
 
-        <div style={{ background: "#F0DFC0", borderBottom: "1px solid #1F2A3C", padding: "12px 16px", textAlign: "center" }}>
-          <span className="lg-display" style={{ fontSize: 22, fontWeight: 700, background: "#FEF08A", padding: "2px 12px", display: "inline-block" }}>{business.name}</span>
-          <div style={{ fontSize: 11, marginTop: 6, whiteSpace: "pre-line" }}>{business.address}</div>
-          <div style={{ fontSize: 11, marginTop: 2 }}>
+        <div style={{ background: "#fff", borderBottom: "1px solid #1F2A3C", padding: "12px 16px", textAlign: "center" }}>
+          <span className="lg-display" style={{ fontSize: 22, fontWeight: 700, background: "transparent", padding: "2px 12px", display: "inline-block" }}>{business.name}</span>
+          <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 6, whiteSpace: "pre-line" }}>{business.address}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 4 }}>
             {business.gstNumber && <>GSTIN: {business.gstNumber}  </>}
             {business.phone && <>Tel: {business.phone}  </>}
             {business.email}
@@ -460,7 +460,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
               </tbody>
             </table>
             <div style={{ borderTop: "1px solid #1F2A3C", padding: "8px 10px" }}>
-              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 6 }}>Signature & stamp</div>
+              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 6 }}>Signature &amp; stamp</div>
               <div style={{ border: "1px solid #1F2A3C", height: 70 }}></div>
             </div>
           </div>

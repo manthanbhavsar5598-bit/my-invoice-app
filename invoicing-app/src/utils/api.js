@@ -316,6 +316,74 @@ const mapInvoice = (
 });
 
 // =========================================================
+// PURCHASE INVOICE
+// =========================================================
+const mapPurchaseInvoice = (pi) => ({
+  id: pi._id,
+  date: iso(pi.date),
+  billNo: pi.billNo || "",
+  companyProfileId:
+    typeof pi.companyProfile === "object"
+      ? pi.companyProfile?._id || pi.companyProfile?.id || ""
+      : pi.companyProfile || "",
+  companyProfileName:
+    typeof pi.companyProfile === "object" ? pi.companyProfile?.name || "" : "",
+  billFrom:
+    (typeof pi.billFrom === "object" ? pi.billFrom?._id : pi.billFrom) || "",
+  billFromName:
+    typeof pi.billFrom === "object" ? pi.billFrom?.name || "" : "",
+  hsnCode: pi.hsnCode || "",
+  weight: Number(pi.weight) || 0,
+  amount: Number(pi.amount) || 0,
+  igst: Number(pi.igst) || 0,
+  cgst: Number(pi.cgst) || 0,
+  sgst: Number(pi.sgst) || 0,
+  roundOff: Number(pi.roundOff) || 0,
+  grandTotal: Number(pi.grandTotal) || 0,
+});
+
+const purchaseInvoiceToApi = (pi) => ({
+  date: pi.date,
+  billNo: pi.billNo,
+  companyProfile: pi.companyProfileId || undefined,
+  billFrom: pi.billFrom,
+  hsnCode: pi.hsnCode,
+  weight: Number(pi.weight) || 0,
+  amount: Number(pi.amount) || 0,
+  igst: Number(pi.igst) || 0,
+  cgst: Number(pi.cgst) || 0,
+  sgst: Number(pi.sgst) || 0,
+  roundOff: Number(pi.roundOff) || 0,
+});
+
+const mapCommission = (c) => ({
+  id: c._id,
+  date: iso(c.date),
+  fromCompany:
+    (typeof c.fromCompany === "object" ? c.fromCompany?._id : c.fromCompany) || "",
+  fromCompanyName:
+    typeof c.fromCompany === "object" ? c.fromCompany?.name || "" : "",
+  toCompany:
+    (typeof c.toCompany === "object" ? c.toCompany?._id : c.toCompany) || "",
+  toCompanyName:
+    typeof c.toCompany === "object" ? c.toCompany?.name || "" : "",
+  item: (typeof c.item === "object" ? c.item?._id : c.item) || "",
+  itemName: typeof c.item === "object" ? c.item?.name || "" : "",
+  quantity: Number(c.quantity) || 0,
+  rate: Number(c.rate) || 0,
+  amount: Number(c.amount) || 0,
+});
+
+const commissionToApi = (c) => ({
+  date: c.date,
+  fromCompany: c.fromCompany,
+  toCompany: c.toCompany,
+  item: c.item,
+  quantity: Number(c.quantity) || 0,
+  rate: Number(c.rate) || 0,
+});
+
+// =========================================================
 // RECURRING
 // =========================================================
 const mapRecurring = (
@@ -751,6 +819,48 @@ export const api = {
       del(
         `/invoices/${id}`
       ),
+  },
+
+  // =======================================================
+  // PURCHASE INVOICES
+  // =======================================================
+  purchaseInvoices: {
+    list: async () =>
+      (await get("/purchase-invoices")).data.purchaseInvoices.map(
+        mapPurchaseInvoice
+      ),
+
+    create: async (pi) =>
+      mapPurchaseInvoice(
+        (await post("/purchase-invoices", purchaseInvoiceToApi(pi))).data
+          .purchaseInvoice
+      ),
+
+    update: async (id, pi) =>
+      mapPurchaseInvoice(
+        (await patch(`/purchase-invoices/${id}`, purchaseInvoiceToApi(pi)))
+          .data.purchaseInvoice
+      ),
+
+    remove: (id) => del(`/purchase-invoices/${id}`),
+  },
+
+  commissions: {
+    list: async () =>
+      (await get("/commissions")).data.commissions.map(mapCommission),
+
+    create: async (c) =>
+      mapCommission(
+        (await post("/commissions", commissionToApi(c))).data.commission
+      ),
+
+    update: async (id, c) =>
+      mapCommission(
+        (await patch(`/commissions/${id}`, commissionToApi(c))).data
+          .commission
+      ),
+
+    remove: (id) => del(`/commissions/${id}`),
   },
 
   // =======================================================

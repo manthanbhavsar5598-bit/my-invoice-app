@@ -9,6 +9,7 @@ import {
 import {
   LayoutDashboard,
   FileText,
+  ReceiptText,
   BarChart2,
   Users,
   Package,
@@ -18,11 +19,13 @@ import {
   LogOut,
   Menu,
   X,
+  HandCoins,
 } from "lucide-react";
 
 import NavItem from "./Components/NavItem";
 import Dashboard from "./Components/Dashboard";
 import Invoices from "./Components/Invoices";
+import PurchaseInvoices from "./Components/PurchaseInvoices";
 import Clients from "./Components/Clients";
 import CompanyProfiles from "./Components/CompanyProfiles";
 import Items from "./Components/Items";
@@ -30,6 +33,7 @@ import Recurring from "./Components/Recurring";
 import Reports from "./Components/Reports";
 import Settings from "./Components/Settings";
 import Login from "./Components/Login";
+import CommissionEntries from "./Components/CommissionEntries";
 
 import { api } from "./utils/api";
 
@@ -45,6 +49,8 @@ const EMPTY_DATA = {
   clients: [],
   items: [],
   invoices: [],
+  purchaseInvoices: [],
+  commissions: [],
   recurring: [],
 };
 
@@ -93,6 +99,8 @@ export default function App() {
         profiles,
         settings,
         invoices,
+        purchaseInvoices,
+        commissions,
         recurring,
       ] = await Promise.all([
         api.clients.list(),
@@ -100,6 +108,8 @@ export default function App() {
         api.profiles.list(),
         api.auth.me(),
         api.invoices.list(),
+        api.purchaseInvoices.list(),
+        api.commissions.list(),
         api.recurring.list(),
       ]);
 
@@ -109,6 +119,8 @@ export default function App() {
         clients,
         items,
         invoices,
+        purchaseInvoices,
+        commissions,
         recurring,
       });
 
@@ -444,6 +456,89 @@ export default function App() {
 
       }
     );
+
+
+  // ==========================================================
+  // PURCHASE INVOICES
+  // ==========================================================
+
+  const savePurchaseInvoice =
+    withErrorHandling(
+      async (pi) => {
+
+        const exists =
+          data.purchaseInvoices.some(
+            (p) =>
+              p.id === pi.id
+          );
+
+        const saved = exists
+          ? await api.purchaseInvoices.update(
+              pi.id,
+              pi
+            )
+          : await api.purchaseInvoices.create(
+              pi
+            );
+
+        setData((d) => ({
+          ...d,
+
+          purchaseInvoices: exists
+            ? d.purchaseInvoices.map((p) =>
+                p.id === saved.id
+                  ? saved
+                  : p
+              )
+            : [
+                ...d.purchaseInvoices,
+                saved,
+              ],
+        }));
+
+      }
+    );
+
+
+  const deletePurchaseInvoice =
+    withErrorHandling(
+      async (id) => {
+
+        await api.purchaseInvoices.remove(id);
+
+        setData((d) => ({
+          ...d,
+
+          purchaseInvoices:
+            d.purchaseInvoices.filter(
+              (p) =>
+                p.id !== id
+            ),
+        }));
+
+      }
+    );
+
+  const saveCommission = withErrorHandling(async (c) => {
+    const exists = data.commissions.some((x) => x.id === c.id);
+    const saved = exists
+      ? await api.commissions.update(c.id, c)
+      : await api.commissions.create(c);
+    setData((d) => ({
+      ...d,
+      commissions: exists
+        ? d.commissions.map((x) => (x.id === saved.id ? saved : x))
+        : [...d.commissions, saved],
+    }));
+  });
+
+  const deleteCommission = withErrorHandling(async (id) => {
+    await api.commissions.remove(id);
+    setData((d) => ({
+      ...d,
+      commissions: d.commissions.filter((x) => x.id !== id),
+    }));
+  });
 
 
   // ==========================================================
@@ -1378,6 +1473,18 @@ export default function App() {
             />
 
             <NavItem
+              icon={ReceiptText}
+              label="Purchase Invoice"
+              path="/purchase-invoices"
+            />
+
+            <NavItem
+              icon={HandCoins}
+              label="Commission Entry"
+              path="/commission-entries"
+            />
+
+            <NavItem
               icon={BarChart2}
               label="Reports"
               path="/reports"
@@ -1544,6 +1651,46 @@ export default function App() {
                     onSaveInvoice={
                       saveInvoice
                     }
+                  />
+                }
+              />
+
+              <Route
+                path="/purchase-invoices"
+                element={
+                  <PurchaseInvoices
+                    clients={
+                      data.clients
+                    }
+                    profiles={
+                      data.profiles
+                    }
+                    purchaseInvoices={
+                      data.purchaseInvoices
+                    }
+                    symbol={
+                      data.settings.currencySymbol
+                    }
+                    onSave={
+                      savePurchaseInvoice
+                    }
+                    onDelete={
+                      deletePurchaseInvoice
+                    }
+                  />
+                }
+              />
+
+              <Route
+                path="/commission-entries"
+                element={
+                  <CommissionEntries
+                    clients={data.clients}
+                    items={data.items}
+                    commissions={data.commissions}
+                    symbol={data.settings.currencySymbol}
+                    onSave={saveCommission}
+                    onDelete={deleteCommission}
                   />
                 }
               />

@@ -1,159 +1,825 @@
-import { uid, computeTotals } from "./helpers";
+import {
+  uid,
+  computeTotals,
+} from "./helpers";
 
-export const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+export const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api/v1";
 
-async function request(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+// =========================================================
+// REQUEST HELPER
+// =========================================================
+async function request(
+  path,
+  options = {}
+) {
+  const res = await fetch(
+    `${API_BASE}${path}`,
+    {
+      credentials: "include",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      ...options,
+    }
+  );
+
   let json = null;
-  try { json = await res.json(); } catch (e) {}
+
+  try {
+    json = await res.json();
+  } catch (error) {
+    // No JSON response
+  }
+
   if (!res.ok) {
-    const msg = json?.message || json?.errors?.[0]?.message || `Request failed (${res.status})`;
+    const msg =
+      json?.message ||
+      json?.errors?.[0]
+        ?.message ||
+      `Request failed (${res.status})`;
+
     throw new Error(msg);
   }
+
   return json;
 }
 
-const get = (p) => request(p);
-const post = (p, body) => request(p, { method: "POST", body: JSON.stringify(body) });
-const patch = (p, body) => request(p, { method: "PATCH", body: JSON.stringify(body) });
-const del = (p) => request(p, { method: "DELETE" });
+// =========================================================
+// HTTP HELPERS
+// =========================================================
+const get = (path) =>
+  request(path);
 
-const iso = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
+const post = (
+  path,
+  body
+) =>
+  request(path, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 
-// ---- mappers: Mongo docs -> the flat shape the existing components expect ----
-const mapClient = (c) => ({ id: c._id, name: c.name || "", email: c.email || "", phone: c.phone || "", address: c.address || "", gstNumber: c.gstNumber || "", stateCode: c.stateCode || "", notes: c.notes || "" });
-const mapItem = (i) => ({ id: i._id, name: i.name || "", description: i.description || "", hsnCode: i.hsnCode || "", unit: i.unit || "", price: i.price || 0 });
-// Company Profile is fully independent from User — no isPrimary, no fallback.
-const mapProfile = (p) => ({ id: p._id, name: p.name || "", email: p.email || "", phone: p.phone || "", address: p.address || "", gstNumber: p.gstNumber || "", currencySymbol: p.currencySymbol || "₹", bankName: p.bankName || "", branchName: p.branchName || "", accountNo: p.accountNo || "", ifscCode: p.ifscCode || "", terms: p.terms || "" });
-// User only carries login/app-setting data — never company data.
-const mapSettings = (u) => ({
-  name: u?.name || "",
-  email: u?.email || "",
-  sendEmailOnInvoiceCreate: u?.settings?.sendEmailOnInvoiceCreate !== false,
-  currencySymbol: u?.settings?.currencySymbol || "₹",
-});
-const mapLine = (li) => ({ ...li, id: li.id || uid("li") });
-const mapInvoice = (i) => ({
-  id: i._id,
-  number: i.number || "",
-  billType: i.billType || "Invoice",
-  companyProfileId: i.companyProfile || "",
-  stateType: i.stateType || "",
-  clientId: (typeof i.client === "object" ? i.client?._id : i.client) || "",
-  issueDate: iso(i.issueDate),
-  dueDate: iso(i.dueDate),
-  lineItems: (i.items || []).map(mapLine),
-  taxRate: i.taxRate || 0,
-  notes: i.notes || "",
-  transportName: i.transportName || "",
-  vehicleNo: i.vehicleNo || "",
-  shipDispatchType: i.shipDispatchType || "",
-  shipDispatchName: i.shipDispatchName || "",
-  shipDispatchAddress: i.shipDispatchAddress || "",
-  shipDispatchGst: i.shipDispatchGst || "",
-  status: i.status || "draft",
-  paidDate: i.paidDate ? iso(i.paidDate) : null,
-});
-const mapRecurring = (r) => ({
-  id: r._id,
-  clientId: (typeof r.client === "object" ? r.client?._id : r.client) || "",
-  frequency: r.frequency || "monthly",
-  nextDate: iso(r.nextDate),
-  lastGenerated: r.lastGenerated ? iso(r.lastGenerated) : null,
-  active: r.active !== false,
-  taxRate: r.taxRate || 0,
-  notes: r.notes || "",
-  lineItems: (r.lineItems || []).map(mapLine),
+const patch = (
+  path,
+  body
+) =>
+  request(path, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+
+const del = (path) =>
+  request(path, {
+    method: "DELETE",
+  });
+
+// =========================================================
+// DATE HELPER
+// =========================================================
+const iso = (date) =>
+  date
+    ? new Date(date)
+        .toISOString()
+        .slice(0, 10)
+    : "";
+
+// =========================================================
+// MAPPERS
+// MongoDB -> Frontend
+// =========================================================
+
+const mapClient = (client) => ({
+  id: client._id,
+  name: client.name || "",
+  email: client.email || "",
+  phone: client.phone || "",
+  address:
+    client.address || "",
+  gstNumber:
+    client.gstNumber || "",
+  stateCode:
+    client.stateCode || "",
+  notes: client.notes || "",
 });
 
-// ---- payload builders: frontend shape -> what the API expects ----
-// Totals are computed here (frontend) and sent as-is; the backend stores
-// them without recalculating, so there's a single source of truth.
-const invoiceToApi = (inv) => {
-  const totals = computeTotals(inv);
+const mapItem = (item) => ({
+  id: item._id,
+  name: item.name || "",
+  description:
+    item.description || "",
+  hsnCode:
+    item.hsnCode || "",
+  unit: item.unit || "",
+  price:
+    item.price || 0,
+});
+
+// =========================================================
+// COMPANY PROFILE
+// =========================================================
+const mapProfile = (
+  profile
+) => ({
+  id: profile._id,
+  name: profile.name || "",
+  email: profile.email || "",
+  phone: profile.phone || "",
+  address:
+    profile.address || "",
+  gstNumber:
+    profile.gstNumber || "",
+  currencySymbol:
+    profile.currencySymbol ||
+    "₹",
+  bankName:
+    profile.bankName || "",
+  branchName:
+    profile.branchName || "",
+  accountNo:
+    profile.accountNo || "",
+  ifscCode:
+    profile.ifscCode || "",
+  terms: profile.terms || "",
+});
+
+// =========================================================
+// USER SETTINGS
+// =========================================================
+const mapSettings = (
+  user
+) => ({
+  name: user?.name || "",
+  email: user?.email || "",
+
+  sendEmailOnInvoiceCreate:
+    user?.settings
+      ?.sendEmailOnInvoiceCreate !==
+    false,
+
+  currencySymbol:
+    user?.settings
+      ?.currencySymbol || "₹",
+});
+
+// =========================================================
+// LINE ITEM
+// =========================================================
+const mapLine = (
+  lineItem
+) => ({
+  ...lineItem,
+  id:
+    lineItem.id ||
+    uid("li"),
+});
+
+// =========================================================
+// INVOICE
+// =========================================================
+// IMPORTANT FIXES:
+//
+// 1. companyProfile can be an ObjectId OR populated object.
+// 2. subtotal is preserved.
+// 3. taxAmount is preserved.
+// 4. total is preserved.
+//
+// Without these values Reports receives 0.
+// =========================================================
+const mapInvoice = (
+  invoice
+) => ({
+  id: invoice._id,
+
+  number:
+    invoice.number || "",
+
+  billType:
+    invoice.billType ||
+    "Invoice",
+
+  // -----------------------------------------------
+  // COMPANY PROFILE ID
+  // -----------------------------------------------
+  companyProfileId:
+    typeof invoice.companyProfile ===
+    "object"
+      ? invoice.companyProfile?._id ||
+        invoice.companyProfile?.id ||
+        ""
+      : invoice.companyProfile ||
+        "",
+
+  stateType:
+    invoice.stateType || "",
+
+  // -----------------------------------------------
+  // CUSTOMER
+  // -----------------------------------------------
+  clientId:
+    (
+      typeof invoice.client ===
+      "object"
+        ? invoice.client?._id
+        : invoice.client
+    ) || "",
+
+  // -----------------------------------------------
+  // DATES
+  // -----------------------------------------------
+  issueDate: iso(
+    invoice.issueDate
+  ),
+
+  dueDate: iso(
+    invoice.dueDate
+  ),
+
+  // -----------------------------------------------
+  // ITEMS
+  // -----------------------------------------------
+  lineItems:
+    (
+      invoice.items || []
+    ).map(mapLine),
+
+  // -----------------------------------------------
+  // TAX RATE
+  // -----------------------------------------------
+  taxRate:
+    Number(
+      invoice.taxRate
+    ) || 0,
+
+  // -----------------------------------------------
+  // IMPORTANT:
+  // BACKEND CALCULATED VALUES
+  // -----------------------------------------------
+  subtotal:
+    Number(
+      invoice.subtotal
+    ) || 0,
+
+  taxAmount:
+    Number(
+      invoice.taxAmount
+    ) || 0,
+
+  total:
+    Number(
+      invoice.total
+    ) || 0,
+
+  // -----------------------------------------------
+  // OTHER FIELDS
+  // -----------------------------------------------
+  notes:
+    invoice.notes || "",
+
+  transportName:
+    invoice.transportName ||
+    "",
+
+  vehicleNo:
+    invoice.vehicleNo || "",
+
+  shipDispatchType:
+    invoice.shipDispatchType ||
+    "",
+
+  shipDispatchName:
+    invoice.shipDispatchName ||
+    "",
+
+  shipDispatchAddress:
+    invoice.shipDispatchAddress ||
+    "",
+
+  shipDispatchGst:
+    invoice.shipDispatchGst ||
+    "",
+
+  status:
+    invoice.status ||
+    "draft",
+
+  paidDate:
+    invoice.paidDate
+      ? iso(
+          invoice.paidDate
+        )
+      : null,
+});
+
+// =========================================================
+// RECURRING
+// =========================================================
+const mapRecurring = (
+  recurring
+) => ({
+  id: recurring._id,
+
+  clientId:
+    (
+      typeof recurring.client ===
+      "object"
+        ? recurring.client?._id
+        : recurring.client
+    ) || "",
+
+  frequency:
+    recurring.frequency ||
+    "monthly",
+
+  nextDate: iso(
+    recurring.nextDate
+  ),
+
+  lastGenerated:
+    recurring.lastGenerated
+      ? iso(
+          recurring.lastGenerated
+        )
+      : null,
+
+  active:
+    recurring.active !== false,
+
+  taxRate:
+    recurring.taxRate || 0,
+
+  notes:
+    recurring.notes || "",
+
+  lineItems:
+    (
+      recurring.lineItems ||
+      []
+    ).map(mapLine),
+});
+
+// =========================================================
+// INVOICE -> API
+// =========================================================
+// Frontend -> Backend
+// =========================================================
+const invoiceToApi = (
+  invoice
+) => {
+  const totals =
+    computeTotals(invoice);
+
   return {
-    client: inv.clientId,
-    companyProfile: inv.companyProfileId || undefined,
-    number: inv.number,
-    billType: inv.billType,
-    stateType: inv.stateType,
-    items: inv.lineItems,
-    taxRate: Number(inv.taxRate) || 0,
-    notes: inv.notes,
-    transportName: inv.transportName,
-    vehicleNo: inv.vehicleNo,
-    shipDispatchType: inv.shipDispatchType,
-    shipDispatchName: inv.shipDispatchName,
-    shipDispatchAddress: inv.shipDispatchAddress,
-    shipDispatchGst: inv.shipDispatchGst,
-    status: inv.status,
-    issueDate: inv.issueDate,
-    dueDate: inv.dueDate,
-    subtotal: totals.subtotal,
-    taxAmount: totals.taxAmount,
-    total: totals.total,
+    client:
+      invoice.clientId,
+
+    companyProfile:
+      invoice.companyProfileId ||
+      undefined,
+
+    number:
+      invoice.number,
+
+    billType:
+      invoice.billType,
+
+    stateType:
+      invoice.stateType,
+
+    items:
+      invoice.lineItems,
+
+    taxRate:
+      Number(
+        invoice.taxRate
+      ) || 0,
+
+    notes:
+      invoice.notes,
+
+    transportName:
+      invoice.transportName,
+
+    vehicleNo:
+      invoice.vehicleNo,
+
+    shipDispatchType:
+      invoice.shipDispatchType,
+
+    shipDispatchName:
+      invoice.shipDispatchName,
+
+    shipDispatchAddress:
+      invoice.shipDispatchAddress,
+
+    shipDispatchGst:
+      invoice.shipDispatchGst,
+
+    status:
+      invoice.status,
+
+    issueDate:
+      invoice.issueDate,
+
+    dueDate:
+      invoice.dueDate,
+
+    // -----------------------------------------------
+    // TOTALS
+    // -----------------------------------------------
+    subtotal:
+      totals.subtotal,
+
+    taxAmount:
+      totals.taxAmount,
+
+    total:
+      totals.total,
   };
 };
-const recurringToApi = (r) => ({
-  client: r.clientId,
-  frequency: r.frequency,
-  nextDate: r.nextDate,
-  active: r.active,
-  taxRate: Number(r.taxRate) || 0,
-  notes: r.notes,
-  lineItems: r.lineItems,
+
+// =========================================================
+// RECURRING -> API
+// =========================================================
+const recurringToApi = (
+  recurring
+) => ({
+  client:
+    recurring.clientId,
+
+  frequency:
+    recurring.frequency,
+
+  nextDate:
+    recurring.nextDate,
+
+  active:
+    recurring.active,
+
+  taxRate:
+    Number(
+      recurring.taxRate
+    ) || 0,
+
+  notes:
+    recurring.notes,
+
+  lineItems:
+    recurring.lineItems,
 });
 
+// =========================================================
+// API
+// =========================================================
 export const api = {
+  // =======================================================
+  // AUTH
+  // =======================================================
   auth: {
-    me: async () => mapSettings((await get("/auth/me")).data.user),
-    login: (email, password) => post("/auth/login", { email, password }),
-    signup: (name, email, password) => post("/auth/signup", { name, email, password }),
-    logout: () => post("/auth/logout", {}),
-    updatePassword: (currentPassword, newPassword) => patch("/auth/update-password", { currentPassword, newPassword }),
-    updateSettings: async (settings) => mapSettings((await patch("/auth/update-me", { settings })).data.user),
-    // PIN-based reset — no current password required. Restricted server-side
-    // to a single configured account.
-    requestPasswordReset: (email) => post("/auth/forgot-password", { email }),
-    resetPasswordWithPin: (email, pin, newPassword) => post("/auth/reset-password", { email, pin, newPassword }),
+    me: async () =>
+      mapSettings(
+        (
+          await get(
+            "/auth/me"
+          )
+        ).data.user
+      ),
+
+    login: (
+      email,
+      password
+    ) =>
+      post(
+        "/auth/login",
+        {
+          email,
+          password,
+        }
+      ),
+
+    signup: (
+      name,
+      email,
+      password
+    ) =>
+      post(
+        "/auth/signup",
+        {
+          name,
+          email,
+          password,
+        }
+      ),
+
+    logout: () =>
+      post(
+        "/auth/logout",
+        {}
+      ),
+
+    updatePassword: (
+      currentPassword,
+      newPassword
+    ) =>
+      patch(
+        "/auth/update-password",
+        {
+          currentPassword,
+          newPassword,
+        }
+      ),
+
+    updateSettings:
+      async (
+        settings
+      ) =>
+        mapSettings(
+          (
+            await patch(
+              "/auth/update-me",
+              {
+                settings,
+              }
+            )
+          ).data.user
+        ),
+
+    requestPasswordReset:
+      (email) =>
+        post(
+          "/auth/forgot-password",
+          {
+            email,
+          }
+        ),
+
+    resetPasswordWithPin:
+      (
+        email,
+        pin,
+        newPassword
+      ) =>
+        post(
+          "/auth/reset-password",
+          {
+            email,
+            pin,
+            newPassword,
+          }
+        ),
   },
+
+  // =======================================================
+  // CLIENTS
+  // =======================================================
   clients: {
-    list: async () => (await get("/clients?limit=100")).data.clients.map(mapClient),
-    create: async (c) => mapClient((await post("/clients", c)).data.client),
-    update: async (id, c) => mapClient((await patch(`/clients/${id}`, c)).data.client),
-    remove: (id) => del(`/clients/${id}`),
+    list: async () =>
+      (
+        await get(
+          "/clients?limit=100"
+        )
+      ).data.clients.map(
+        mapClient
+      ),
+
+    create: async (
+      client
+    ) =>
+      mapClient(
+        (
+          await post(
+            "/clients",
+            client
+          )
+        ).data.client
+      ),
+
+    update: async (
+      id,
+      client
+    ) =>
+      mapClient(
+        (
+          await patch(
+            `/clients/${id}`,
+            client
+          )
+        ).data.client
+      ),
+
+    remove: (id) =>
+      del(
+        `/clients/${id}`
+      ),
   },
+
+  // =======================================================
+  // ITEMS
+  // =======================================================
   items: {
-    list: async () => (await get("/items")).data.items.map(mapItem),
-    create: async (i) => mapItem((await post("/items", i)).data.item),
-    update: async (id, i) => mapItem((await patch(`/items/${id}`, i)).data.item),
-    remove: (id) => del(`/items/${id}`),
+    list: async () =>
+      (
+        await get(
+          "/items"
+        )
+      ).data.items.map(
+        mapItem
+      ),
+
+    create: async (
+      item
+    ) =>
+      mapItem(
+        (
+          await post(
+            "/items",
+            item
+          )
+        ).data.item
+      ),
+
+    update: async (
+      id,
+      item
+    ) =>
+      mapItem(
+        (
+          await patch(
+            `/items/${id}`,
+            item
+          )
+        ).data.item
+      ),
+
+    remove: (id) =>
+      del(
+        `/items/${id}`
+      ),
   },
-  // Company Profiles — a user can have many, none of them "primary".
+
+  // =======================================================
+  // COMPANY PROFILES
+  // =======================================================
   profiles: {
-    list: async () => (await get("/company-profiles")).data.profiles.map(mapProfile),
-    create: async (p) => mapProfile((await post("/company-profiles", p)).data.profile),
-    update: async (id, p) => mapProfile((await patch(`/company-profiles/${id}`, p)).data.profile),
-    remove: (id) => del(`/company-profiles/${id}`),
+    list: async () =>
+      (
+        await get(
+          "/company-profiles"
+        )
+      ).data.profiles.map(
+        mapProfile
+      ),
+
+    create: async (
+      profile
+    ) =>
+      mapProfile(
+        (
+          await post(
+            "/company-profiles",
+            profile
+          )
+        ).data.profile
+      ),
+
+    update: async (
+      id,
+      profile
+    ) =>
+      mapProfile(
+        (
+          await patch(
+            `/company-profiles/${id}`,
+            profile
+          )
+        ).data.profile
+      ),
+
+    remove: (id) =>
+      del(
+        `/company-profiles/${id}`
+      ),
   },
+
+  // =======================================================
+  // INVOICES
+  // =======================================================
   invoices: {
-    list: async () => (await get("/invoices?limit=100")).data.invoices.map(mapInvoice),
-    create: async (inv) => mapInvoice((await post("/invoices", invoiceToApi(inv))).data.invoice),
-    update: async (id, inv) => mapInvoice((await patch(`/invoices/${id}`, invoiceToApi(inv))).data.invoice),
-    remove: (id) => del(`/invoices/${id}`),
+    list: async () =>
+      (
+        await get(
+          "/invoices?limit=100"
+        )
+      ).data.invoices.map(
+        mapInvoice
+      ),
+
+    create: async (
+      invoice
+    ) =>
+      mapInvoice(
+        (
+          await post(
+            "/invoices",
+            invoiceToApi(
+              invoice
+            )
+          )
+        ).data.invoice
+      ),
+
+    update: async (
+      id,
+      invoice
+    ) =>
+      mapInvoice(
+        (
+          await patch(
+            `/invoices/${id}`,
+            invoiceToApi(
+              invoice
+            )
+          )
+        ).data.invoice
+      ),
+
+    remove: (id) =>
+      del(
+        `/invoices/${id}`
+      ),
   },
+
+  // =======================================================
+  // RECURRING
+  // =======================================================
   recurring: {
-    list: async () => (await get("/recurring")).data.recurring.map(mapRecurring),
-    create: async (r) => mapRecurring((await post("/recurring", recurringToApi(r))).data.recurring),
-    update: async (id, r) => mapRecurring((await patch(`/recurring/${id}`, recurringToApi(r))).data.recurring),
-    remove: (id) => del(`/recurring/${id}`),
-    generate: async (id) => {
-      const res = await post(`/recurring/${id}/generate`, {});
-      return { invoice: mapInvoice(res.data.invoice), recurring: mapRecurring(res.data.recurring) };
+    list: async () =>
+      (
+        await get(
+          "/recurring"
+        )
+      ).data.recurring.map(
+        mapRecurring
+      ),
+
+    create: async (
+      recurring
+    ) =>
+      mapRecurring(
+        (
+          await post(
+            "/recurring",
+            recurringToApi(
+              recurring
+            )
+          )
+        ).data.recurring
+      ),
+
+    update: async (
+      id,
+      recurring
+    ) =>
+      mapRecurring(
+        (
+          await patch(
+            `/recurring/${id}`,
+            recurringToApi(
+              recurring
+            )
+          )
+        ).data.recurring
+      ),
+
+    remove: (id) =>
+      del(
+        `/recurring/${id}`
+      ),
+
+    generate: async (
+      id
+    ) => {
+      const response =
+        await post(
+          `/recurring/${id}/generate`,
+          {}
+        );
+
+      return {
+        invoice:
+          mapInvoice(
+            response.data.invoice
+          ),
+
+        recurring:
+          mapRecurring(
+            response.data.recurring
+          ),
+      };
     },
   },
 };

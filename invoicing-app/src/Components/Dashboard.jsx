@@ -17,37 +17,52 @@ import Metric from "./Metric";
 import Stamp from "./Stamp";
 import { todayISO, displayStatus, computeTotals, money, fmtDate } from "../utils/helpers";
 
-export default function Dashboard({ data, clientsById }) {
+export default function Dashboard({ data = {}, clientsById = {} }) {
   const navigate = useNavigate();
-  const symbol = data.settings.currencySymbol;
-  
-  const outstanding = data.invoices.filter((i) => displayStatus(i) === "sent" || displayStatus(i) === "overdue");
+  const symbol = data?.settings?.currencySymbol || "₹";
+  const invoices = data?.invoices || [];
+  const recurring = data?.recurring || [];
+
+  const outstanding = invoices.filter((i) => displayStatus(i) === "sent" || displayStatus(i) === "overdue");
   const outstandingTotal = outstanding.reduce((s, i) => s + computeTotals(i).total, 0);
-  const overdueCount = data.invoices.filter((i) => displayStatus(i) === "overdue").length;
-  
+  const overdueCount = invoices.filter((i) => displayStatus(i) === "overdue").length;
+
   const thisMonth = todayISO().slice(0, 7);
-  const paidThisMonth = data.invoices
+  const paidThisMonth = invoices
     .filter((i) => i.status === "paid" && (i.paidDate || "").slice(0, 7) === thisMonth)
     .reduce((s, i) => s + computeTotals(i).total, 0);
-    
-  const dueRecurring = data.recurring.filter((r) => r.active && r.nextDate <= todayISO()).length;
 
+  const dueRecurring = recurring.filter((r) => r.active && r.nextDate <= todayISO()).length;
+
+  // Fixed Monthly Analytics Data Calculation
   const chartData = useMemo(() => {
     const months = [];
     const now = new Date();
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleDateString(undefined, { month: "short" }) });
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      months.push({ 
+        key: `${year}-${month}`, 
+        label: d.toLocaleDateString(undefined, { month: "short" }) 
+      });
     }
+
     return months.map((m) => {
-      const total = data.invoices
-        .filter((i) => i.status === "paid" && (i.paidDate || i.issueDate || "").slice(0, 7) === m.key)
-        .reduce((s, i) => s + computeTotals(i).total, 0);
+      // Include all valid issued or paid invoices for chart visualization
+      const total = invoices
+        .filter((i) => {
+          const dateStr = i.issueDate || i.paidDate || i.createdAt || "";
+          return dateStr.slice(0, 7) === m.key && i.status !== "draft";
+        })
+        .reduce((sum, inv) => sum + (computeTotals(inv).total || 0), 0);
+
       return { name: m.label, revenue: Math.round(total * 100) / 100 };
     });
-  }, [data.invoices]);
+  }, [invoices]);
 
-  const recent = [...data.invoices].sort((a, b) => (b.issueDate || "").localeCompare(a.issueDate || "")).slice(0, 6);
+  const recent = [...invoices].sort((a, b) => (b.issueDate || "").localeCompare(a.issueDate || "")).slice(0, 6);
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric", year: "numeric" });
 
   return (
@@ -66,7 +81,7 @@ export default function Dashboard({ data, clientsById }) {
             Dashboard
           </h1>
         </div>
-        
+
         <div style={{ display: "flex", gap: 12 }}>
           <button 
             className="lg-btn-ghost" 
@@ -117,8 +132,8 @@ export default function Dashboard({ data, clientsById }) {
             Live Data
           </div>
         </div>
-        
-        <div style={{ height: 220 }}>
+
+        <div style={{ height: 220, minWidth: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>

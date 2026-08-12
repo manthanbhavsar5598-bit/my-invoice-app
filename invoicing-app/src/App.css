@@ -1,0 +1,1785 @@
+/* ==========================================================
+   GLOBAL
+   ========================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+
+  background: #f8fafc;
+
+  overflow-x: hidden;
+}
+
+
+/* ==========================================================
+   APP SHELL
+   ========================================================== */
+
+.lg-app-shell {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 100vh;
+
+  display: flex;
+
+  background: #f8fafc;
+}
+
+
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
+
+.lg-sidebar {
+  position: fixed !important;
+
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+
+  width: 230px !important;
+  min-width: 230px !important;
+
+  height: 100vh !important;
+
+  z-index: 100;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  padding: 18px 13px !important;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #0b1220 0%,
+      #0f172a 100%
+    ) !important;
+
+  border-right:
+    1px solid #1e293b !important;
+
+  color: #e2e8f0;
+
+  box-shadow:
+    5px 0 22px
+    rgba(15, 23, 42, 0.07);
+}
+
+
+/* ==========================================================
+   MAIN CONTENT
+   ========================================================== */
+
+.lg-main-content {
+  margin-left: 230px;
+
+  width: calc(100% - 230px);
+
+  min-height: 100vh;
+
+  padding: 28px;
+
+  overflow-x: hidden;
+}
+
+
+/* ==========================================================
+   SIDEBAR NAV
+   ========================================================== */
+
+.lg-sidebar .lg-tab {
+  color: #94a3b8;
+
+  border-radius: 9px;
+
+  padding: 10px 12px;
+
+  margin: 2px 0;
+
+  transition:
+    background .15s ease,
+    color .15s ease;
+}
+
+
+.lg-sidebar .lg-tab:hover {
+  background:
+    rgba(255, 255, 255, .055);
+
+  color:
+    #ffffff;
+}
+
+
+.lg-sidebar .lg-tab.active {
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #1d4ed8
+    );
+
+  color:
+    #ffffff;
+
+  box-shadow:
+    0 6px 16px
+    rgba(37, 99, 235, .23);
+}
+
+
+.lg-sidebar-logout {
+  margin-top: auto !important;
+
+  color: #94a3b8 !important;
+}
+
+
+/* ==========================================================
+   COMPANY SETTINGS PAGE
+   ========================================================== */
+
+.company-settings-page {
+  width: 100%;
+
+  max-width: 1420px;
+
+  margin: 0 auto;
+
+  color: #0f172a;
+
+  padding-bottom: 50px;
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+   ========================================================== */
+
+.company-settings-header {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  margin-bottom: 28px;
+}
+
+
+.company-settings-header h1 {
+  margin: 0;
+
+  font-size: 32px;
+
+  line-height: 1.1;
+
+  font-weight: 750;
+
+  letter-spacing: -0.035em;
+
+  color: #0f172a;
+}
+
+
+.company-settings-header p {
+  margin: 8px 0 0;
+
+  font-size: 13px;
+
+  color: #64748b;
+}
+
+
+/* ==========================================================
+   MAIN COMPANY SETTINGS LAYOUT
+   ========================================================== */
+
+.company-settings-layout {
+  display: grid;
+
+  grid-template-columns:
+    395px
+    minmax(0, 1fr);
+
+  gap: 32px;
+
+  align-items: start;
+}
+
+
+/* ==========================================================
+   LEFT PROFILE PANEL
+   ========================================================== */
+
+.company-profile-sidebar {
+  min-width: 0;
+
+  padding-top: 4px;
+}
+
+
+.company-profile-sidebar-head {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 15px;
+}
+
+
+.company-profile-title span {
+  font-size: 13px;
+
+  font-weight: 700;
+
+  letter-spacing: .09em;
+
+  color: #64748b;
+}
+
+
+/* ==========================================================
+   ADD BUTTON
+   ========================================================== */
+
+.cs-add-small {
+  height: 43px;
+
+  min-width: 93px;
+
+  padding: 0 17px;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #0f172a;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  font-size: 14px;
+
+  font-weight: 650;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 2px 5px
+    rgba(15, 23, 42, .06);
+
+  transition:
+    all .15s ease;
+}
+
+
+.cs-add-small:hover {
+  background: #f8fafc;
+
+  border-color: #cbd5e1;
+
+  transform: translateY(-1px);
+}
+
+
+/* ==========================================================
+   PROFILE LIST
+   ========================================================== */
+
+.company-profile-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+.cs-profile-item {
+  width: 100%;
+
+  min-height: 84px;
+
+  padding: 13px 15px;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  color: #0f172a;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease,
+    transform .15s ease;
+}
+
+
+.cs-profile-item:hover {
+  border-color: #cbd5e1;
+
+  background: #fafcff;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 12px
+    rgba(15, 23, 42, .05);
+}
+
+
+.cs-profile-item.selected {
+  border-color: #0f172a;
+
+  background: #f8fafc;
+
+  box-shadow:
+    0 2px 7px
+    rgba(15, 23, 42, .04);
+}
+
+
+.cs-profile-avatar {
+  width: 38px;
+
+  height: 38px;
+
+  min-width: 38px;
+
+  border-radius: 9px;
+
+  display: grid;
+
+  place-items: center;
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  font-weight: 800;
+}
+
+
+.cs-profile-item.selected
+.cs-profile-avatar {
+  background: #e2e8f0;
+
+  color: #334155;
+}
+
+
+.cs-profile-avatar.new {
+  background: #eff6ff;
+
+  color: #2563eb;
+}
+
+
+.cs-profile-item-content {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+
+.cs-profile-item-content strong {
+  display: block;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+
+.cs-profile-item-content span {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 11px;
+
+  color: #64748b;
+}
+
+
+/* ==========================================================
+   PROFILE COUNT
+   ========================================================== */
+
+.company-profile-sidebar-footer {
+  margin-top: 18px;
+
+  padding-top: 15px;
+
+  border-top:
+    1px solid #e2e8f0;
+}
+
+
+.cs-profile-count {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+
+/* ==========================================================
+   RIGHT EDITOR
+   ========================================================== */
+
+.company-settings-editor {
+  min-width: 0;
+
+  background: #ffffff;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius: 17px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .035);
+
+  overflow: hidden;
+}
+
+
+/* ==========================================================
+   EDITOR HEADER
+   ========================================================== */
+
+.company-settings-editor-header {
+  padding:
+    32px 32px 25px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  gap: 20px;
+
+  border-bottom:
+    1px solid #eef2f7;
+}
+
+
+.cs-editor-kicker {
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: .12em;
+
+  color: #64748b;
+
+  margin-bottom: 7px;
+}
+
+
+.company-settings-editor-header h2 {
+  margin: 0;
+
+  font-size: 23px;
+
+  line-height: 1.15;
+
+  font-weight: 750;
+
+  color: #0f172a;
+}
+
+
+.company-settings-editor-header p {
+  margin:
+    7px 0 0;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
+
+/* ==========================================================
+   DELETE BUTTON
+   ========================================================== */
+
+.cs-delete-button {
+  height: 44px;
+
+  padding: 0 18px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  background: #ef0000;
+
+  color: #ffffff;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 10px
+    rgba(239, 0, 0, .12);
+
+  transition:
+    all .15s ease;
+}
+
+
+.cs-delete-button:hover {
+  background: #dc0000;
+
+  transform: translateY(-1px);
+}
+
+
+.cs-delete-button:disabled {
+  opacity: .55;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* ==========================================================
+   EDITOR BODY
+   ========================================================== */
+
+.company-settings-editor-body {
+  padding:
+    27px 32px 8px;
+}
+
+
+/* ==========================================================
+   FORM SECTION
+   ========================================================== */
+
+.cs-form-section {
+  padding-bottom: 28px;
+
+  margin-bottom: 27px;
+
+  border-bottom:
+    1px solid #eef2f7;
+}
+
+
+.cs-form-section:last-child {
+  margin-bottom: 0;
+
+  border-bottom: 0;
+}
+
+
+/* ==========================================================
+   SECTION HEADING
+   ========================================================== */
+
+.cs-section-heading {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+
+  margin-bottom: 18px;
+}
+
+
+.cs-section-icon {
+  width: 35px;
+
+  height: 35px;
+
+  min-width: 35px;
+
+  border-radius: 9px;
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  display: grid;
+
+  place-items: center;
+}
+
+
+.cs-section-heading h3 {
+  margin: 0 0 3px;
+
+  font-size: 14px;
+
+  font-weight: 750;
+
+  color: #0f172a;
+}
+
+
+.cs-section-heading p {
+  margin: 0;
+
+  font-size: 11px;
+
+  color: #94a3b8;
+}
+
+
+/* ==========================================================
+   FORM GRID
+   ========================================================== */
+
+.cs-form-grid {
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 19px;
+}
+
+
+.cs-two-columns {
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  column-gap: 20px;
+}
+
+
+/* ==========================================================
+   FIELD
+   ========================================================== */
+
+.cs-field {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  min-width: 0;
+}
+
+
+.cs-label {
+  font-size: 13px;
+
+  line-height: 1.2;
+
+  font-weight: 650;
+
+  color: #0f172a;
+}
+
+
+.cs-label b {
+  margin-left: 3px;
+
+  color: #dc2626;
+}
+
+
+/* ==========================================================
+   INPUT WRAPPER
+   ========================================================== */
+
+.cs-input-wrap {
+  position: relative;
+
+  width: 100%;
+}
+
+
+/* ==========================================================
+   INPUT ICON
+   IMPORTANT:
+   Icon is completely separated from text area.
+   ========================================================== */
+
+.cs-input-icon {
+  position: absolute;
+
+  left: 14px;
+
+  top: 50%;
+
+  width: 18px;
+
+  height: 18px;
+
+  transform: translateY(-50%);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #94a3b8;
+
+  pointer-events: none;
+
+  z-index: 5;
+}
+
+
+/* ==========================================================
+   INPUT + TEXTAREA
+   ========================================================== */
+
+.cs-input-wrap input,
+.cs-input-wrap textarea {
+  width: 100%;
+
+  border:
+    1px solid #dbe2ea;
+
+  border-radius:
+    10px;
+
+  background:
+    #ffffff;
+
+  color:
+    #0f172a;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif;
+
+  font-size:
+    14px;
+
+  outline:
+    none;
+
+  position:
+    relative;
+
+  z-index:
+    1;
+
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+
+/* ==========================================================
+   NORMAL INPUT
+   ========================================================== */
+
+.cs-input-wrap input {
+  height: 50px;
+
+  padding:
+    0 14px !important;
+}
+
+
+/* ==========================================================
+   CRITICAL FIX
+   INPUTS WITH ICON
+   ========================================================== */
+
+.cs-input-wrap.has-icon input {
+  padding-left:
+    48px !important;
+}
+
+
+/* ==========================================================
+   TEXTAREA
+   ========================================================== */
+
+.cs-input-wrap textarea {
+  min-height: 92px;
+
+  padding:
+    13px 14px !important;
+
+  line-height: 1.5;
+
+  resize: vertical;
+}
+
+
+/* ==========================================================
+   FOCUS
+   ========================================================== */
+
+.cs-input-wrap input:focus,
+.cs-input-wrap textarea:focus {
+  border-color:
+    #94a3b8;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(148, 163, 184, .13);
+}
+
+
+/* ==========================================================
+   PLACEHOLDER
+   ========================================================== */
+
+.cs-input-wrap input::placeholder,
+.cs-input-wrap textarea::placeholder {
+  color:
+    #94a3b8;
+}
+
+
+/* ==========================================================
+   EDITOR FOOTER
+   ========================================================== */
+
+.company-settings-editor-footer {
+  min-height: 72px;
+
+  padding:
+    14px 32px;
+
+  background:
+    #fafbfc;
+
+  border-top:
+    1px solid #eef2f7;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    20px;
+}
+
+
+.cs-save-hint {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    7px;
+
+  font-size:
+    10px;
+
+  color:
+    #94a3b8;
+}
+
+
+.cs-save-dot {
+  width:
+    6px;
+
+  height:
+    6px;
+
+  border-radius:
+    50%;
+
+  background:
+    #22c55e;
+}
+
+
+.cs-footer-actions {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    9px;
+}
+
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+.cs-primary,
+.cs-secondary {
+  height:
+    43px;
+
+  padding:
+    0 18px;
+
+  border-radius:
+    10px;
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    7px;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif;
+
+  font-size:
+    13px;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+
+  transition:
+    all .15s ease;
+}
+
+
+.cs-primary {
+  border:
+    1px solid #0f172a;
+
+  background:
+    #0f172a;
+
+  color:
+    #ffffff;
+
+  box-shadow:
+    0 4px 10px
+    rgba(15, 23, 42, .10);
+}
+
+
+.cs-primary:hover {
+  background:
+    #1e293b;
+
+  transform:
+    translateY(-1px);
+}
+
+
+.cs-primary:disabled {
+  opacity:
+    .6;
+
+  cursor:
+    not-allowed;
+
+  transform:
+    none;
+}
+
+
+.cs-secondary {
+  border:
+    1px solid #dbe2ea;
+
+  background:
+    #ffffff;
+
+  color:
+    #334155;
+}
+
+
+.cs-secondary:hover {
+  background:
+    #f8fafc;
+}
+
+
+.cs-save {
+  min-width:
+    145px;
+}
+
+
+/* ==========================================================
+   EMPTY STATE
+   ========================================================== */
+
+.cs-empty {
+  min-height:
+    430px;
+
+  background:
+    #ffffff;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius:
+    17px;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  text-align:
+    center;
+
+  padding:
+    40px;
+}
+
+
+.cs-empty-icon {
+  width:
+    64px;
+
+  height:
+    64px;
+
+  border-radius:
+    17px;
+
+  background:
+    #f1f5f9;
+
+  color:
+    #64748b;
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  margin-bottom:
+    17px;
+}
+
+
+.cs-empty h2 {
+  margin:
+    0 0 7px;
+
+  font-size:
+    19px;
+}
+
+
+.cs-empty p {
+  max-width:
+    430px;
+
+  margin:
+    0 0 20px;
+
+  color:
+    #64748b;
+
+  font-size:
+    12px;
+
+  line-height:
+    1.6;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 1100px) {
+
+  .company-settings-layout {
+    grid-template-columns:
+      300px
+      minmax(0, 1fr);
+
+    gap:
+      22px;
+  }
+
+
+  .company-settings-editor-header,
+  .company-settings-editor-body {
+    padding-left:
+      24px;
+
+    padding-right:
+      24px;
+  }
+
+
+  .company-settings-editor-footer {
+    padding-left:
+      24px;
+
+    padding-right:
+      24px;
+  }
+}
+
+
+@media (max-width: 850px) {
+
+  .company-settings-layout {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .company-profile-list {
+    display:
+      grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .company-profile-sidebar-footer {
+    display:
+      none;
+  }
+}
+
+
+@media (max-width: 650px) {
+
+  .lg-sidebar {
+    width:
+      68px !important;
+
+    min-width:
+      68px !important;
+  }
+
+
+  .lg-main-content {
+    margin-left:
+      68px;
+
+    width:
+      calc(100% - 68px);
+
+    padding:
+      18px;
+  }
+
+
+  .company-settings-header h1 {
+    font-size:
+      27px;
+  }
+
+
+  .company-profile-list {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .cs-two-columns {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .company-settings-editor-header {
+    flex-direction:
+      column;
+  }
+
+
+  .cs-delete-button {
+    width:
+      100%;
+  }
+
+
+  .company-settings-editor-footer {
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+  }
+
+
+  .cs-save-hint {
+    justify-content:
+      center;
+  }
+
+
+  .cs-footer-actions {
+    width:
+      100%;
+  }
+
+
+  .cs-footer-actions button {
+    flex:
+      1;
+  }
+}
+
+
+/* ==========================================================
+   PRINT
+   ========================================================== */
+
+@media print {
+
+  .lg-sidebar {
+    display:
+      none !important;
+  }
+
+
+  .lg-main-content {
+    margin:
+      0 !important;
+
+    width:
+      100% !important;
+
+    min-height:
+      auto !important;
+
+    padding:
+      0 !important;
+  }
+
+}
+
+/* ==========================================================
+   FINAL SIDEBAR OVERRIDES
+   Fixes:
+   - full viewport height on every page
+   - no unwanted brand subtitle
+   - prevents global .lg-tab styles from changing sidebar
+   - keeps logout at the bottom
+   ========================================================== */
+
+.lg-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+
+  width: 230px !important;
+  min-width: 230px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+
+  margin: 0 !important;
+  padding: 18px 13px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-self: auto !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  flex-shrink: 0 !important;
+
+  box-sizing: border-box !important;
+}
+
+.lg-sidebar-brand {
+  width: 100% !important;
+  min-height: 52px !important;
+  height: 52px !important;
+
+  margin: 0 0 18px !important;
+  padding: 0 8px !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 10px !important;
+
+  flex-shrink: 0 !important;
+}
+
+.lg-brand-title-wrap {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.lg-brand-title {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  color: #ffffff !important;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif !important;
+
+  font-size: 15px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+
+  letter-spacing: .04em !important;
+
+  white-space: nowrap !important;
+}
+
+.lg-brand-subtitle {
+  display: none !important;
+}
+
+.lg-sidebar-section-label {
+  margin: 8px 0 5px !important;
+  padding: 0 12px !important;
+
+  color: #64748b !important;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif !important;
+
+  font-size: 10px !important;
+  line-height: 18px !important;
+  font-weight: 800 !important;
+
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+
+  flex-shrink: 0 !important;
+}
+
+.lg-sidebar-section-gap {
+  margin-top: 13px !important;
+}
+
+.lg-sidebar .lg-tab {
+  width: 100% !important;
+  min-height: 42px !important;
+  height: 42px !important;
+
+  margin: 2px 0 !important;
+  padding: 0 12px !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 10px !important;
+
+  border: 0 !important;
+  border-radius: 9px !important;
+
+  background: transparent !important;
+  color: #94a3b8 !important;
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif !important;
+
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 600 !important;
+
+  text-align: left !important;
+
+  cursor: pointer !important;
+
+  flex-shrink: 0 !important;
+
+  box-sizing: border-box !important;
+}
+
+.lg-sidebar .lg-tab svg {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+
+  flex-shrink: 0 !important;
+
+  color: currentColor !important;
+}
+
+.lg-sidebar .lg-tab span {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  color: inherit !important;
+
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 600 !important;
+
+  white-space: nowrap !important;
+}
+
+.lg-sidebar .lg-tab:hover {
+  background: rgba(255,255,255,.055) !important;
+  color: #f8fafc !important;
+}
+
+.lg-sidebar .lg-tab.active {
+  background: #2563eb !important;
+  color: #ffffff !important;
+
+  box-shadow:
+    0 6px 16px
+    rgba(37,99,235,.23) !important;
+}
+
+.lg-sidebar .lg-tab.active span {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.lg-sidebar > div[style*="flex"] {
+  flex: 1 1 auto !important;
+  min-height: 20px !important;
+}
+
+.lg-sidebar-error {
+  flex-shrink: 0 !important;
+  margin-bottom: 6px !important;
+}
+
+.lg-sidebar .lg-sidebar-logout {
+  width: 100% !important;
+  min-height: 42px !important;
+  height: 42px !important;
+
+  margin-top: 8px !important;
+  padding: 0 12px !important;
+
+  flex-shrink: 0 !important;
+
+  border-top:
+    1px solid rgba(255,255,255,.07) !important;
+
+  border-radius: 0 !important;
+
+  background: transparent !important;
+}
+
+.lg-sidebar::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.lg-sidebar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.lg-sidebar::-webkit-scrollbar-thumb {
+  background: #334155 !important;
+  border-radius: 20px !important;
+}
+
+@media (max-width: 650px) {
+  .lg-sidebar {
+    width: 68px !important;
+    min-width: 68px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    padding: 14px 8px !important;
+  }
+
+  .lg-brand-title,
+  .lg-brand-title-wrap {
+    display: none !important;
+  }
+
+  .lg-sidebar-brand {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .lg-sidebar-section-label {
+    display: none !important;
+  }
+
+  .lg-sidebar .lg-tab {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .lg-sidebar .lg-tab span {
+    display: none !important;
+  }
+
+  .lg-sidebar .lg-sidebar-logout {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .lg-sidebar .lg-sidebar-logout span {
+    display: none !important;
+  }
+}
+
+@media print {
+  .lg-sidebar {
+    display: none !important;
+  }
+}
+
+
+/* ==========================================================
+   MOBILE HAMBURGER SIDEBAR
+   ========================================================== */
+
+.lg-mobile-menu-button,
+.lg-mobile-sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 650px) {
+
+  .lg-mobile-menu-button {
+    position: fixed;
+
+    top: 14px;
+    left: 14px;
+
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    box-shadow: 0 5px 16px rgba(15, 23, 42, .10);
+
+    cursor: pointer;
+
+    z-index: 10002;
+  }
+
+  .lg-mobile-menu-button:active {
+    transform: scale(.97);
+  }
+
+  .lg-mobile-sidebar-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 0;
+    margin: 0;
+
+    border: 0;
+
+    background: rgba(2, 8, 23, .45);
+
+    cursor: pointer;
+
+    z-index: 10000;
+  }
+
+  .lg-sidebar {
+    position: fixed !important;
+
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+
+    width: 280px !important;
+    min-width: 280px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+
+    padding: 18px 13px !important;
+
+    transform: translateX(-105%) !important;
+
+    transition: transform .22s ease !important;
+
+    box-shadow: 8px 0 30px rgba(2, 8, 23, .22) !important;
+
+    z-index: 10001 !important;
+  }
+
+  .lg-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .lg-sidebar-brand {
+    justify-content: flex-start !important;
+    padding: 0 8px !important;
+  }
+
+  .lg-brand-title,
+  .lg-brand-title-wrap {
+    display: flex !important;
+  }
+
+  .lg-sidebar-section-label {
+    display: block !important;
+  }
+
+  .lg-sidebar .lg-tab {
+    justify-content: flex-start !important;
+    padding: 0 12px !important;
+  }
+
+  .lg-sidebar .lg-tab span {
+    display: inline !important;
+  }
+
+  .lg-sidebar .lg-sidebar-logout {
+    justify-content: flex-start !important;
+    padding: 0 12px !important;
+  }
+
+  .lg-sidebar .lg-sidebar-logout span {
+    display: inline !important;
+  }
+
+  .lg-main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+
+    padding: 72px 14px 20px !important;
+  }
+
+  .lg-app-shell {
+    overflow-x: hidden !important;
+  }
+}
+
+@media (min-width: 651px) {
+  .lg-mobile-menu-button,
+  .lg-mobile-sidebar-overlay {
+    display: none !important;
+  }
+}

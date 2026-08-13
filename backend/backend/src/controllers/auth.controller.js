@@ -9,13 +9,19 @@ const sendEmail = require('../utils/sendEmail');
 // Only this account is permitted to use the password-reset flow.
 const RESET_ALLOWED_EMAIL = 'manthanbhavsar5598@gmail.com';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const cookieOptions = () => ({
   expires: new Date(
     Date.now() + (Number(process.env.JWT_COOKIE_EXPIRES_DAYS) || 7) * 24 * 60 * 60 * 1000
   ),
   httpOnly: true, // not accessible from JS -> mitigates XSS token theft
-  secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
-  sameSite: 'lax'
+  secure: isProd, // HTTPS only in prod (required for SameSite=None)
+  // Frontend and backend live on two different *.vercel.app domains, which
+  // browsers treat as cross-site. SameSite=None is required for the cookie
+  // to be sent on those cross-site fetch() calls; SameSite=None only works
+  // when secure is also true, which is why this is prod-only.
+  sameSite: isProd ? 'none' : 'lax'
 });
 
 const sendAuthResponse = (user, statusCode, res) => {
@@ -53,7 +59,12 @@ exports.login = catchAsync(async (req, res) => {
 });
 
 exports.logout = (req, res) => {
-  res.cookie('token', 'loggedout', { expires: new Date(Date.now() + 1000), httpOnly: true });
+  res.cookie('token', 'loggedout', {
+    expires: new Date(Date.now() + 1000),
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax'
+  });
   res.status(200).json({ success: true, message: 'Logged out.' });
 };
 

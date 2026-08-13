@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import EntityForm from "./EntityForm";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import { uid } from "../utils/helpers";
 
 export default function Clients({ clients, invoices, onSave, onDelete }) {
   const [editingId, setEditingId] = useState(null);
+  const pagination = usePagination(clients);
+  const { pageItems } = pagination;
 
   const editing = editingId === "new"
     ? { id: uid("cl"), name: "", email: "", phone: "", address: "", gstNumber: "", stateCode: "" }
@@ -48,7 +52,7 @@ export default function Clients({ clients, invoices, onSave, onDelete }) {
               <tr><th>Name</th><th>Email</th><th>Phone</th><th>GST no</th><th>State code</th><th>Invoices</th><th></th></tr>
             </thead>
             <tbody>
-              {clients.map((c) => (
+              {pageItems.map((c) => (
                 <tr key={c.id}>
                   <td>{c.name}</td>
                   <td>{c.email}</td>
@@ -67,6 +71,7 @@ export default function Clients({ clients, invoices, onSave, onDelete }) {
             </tbody>
           </table>
         )}
+        <Pagination {...pagination} />
       </div>
     </div>
   );

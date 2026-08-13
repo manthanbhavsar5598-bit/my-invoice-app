@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Plus, Search, Printer, Trash2 } from "lucide-react";
 import Stamp from "./Stamp";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import { displayStatus, computeTotals, fmtDate, money } from "../utils/helpers";
 
 export default function InvoiceList({ data, clientsById, filter, setFilter, search, setSearch, onNew, onOpen, onPrint, onDelete, onSetStatus }) {
@@ -12,6 +14,16 @@ export default function InvoiceList({ data, clientsById, filter, setFilter, sear
     list = list.filter((i) => i.number.toLowerCase().includes(q) || (clientsById[i.clientId]?.name || "").toLowerCase().includes(q));
   }
   list = [...list].sort((a, b) => (b.issueDate || "").localeCompare(a.issueDate || ""));
+
+  const pagination = usePagination(list);
+  const { pageItems, setPage } = pagination;
+  // Reset back to page 1 whenever the filtered result set changes
+  // (new search term or status filter) so we don't get stuck on a
+  // now-empty page.
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, search]);
 
   return (
     <div>
@@ -43,7 +55,7 @@ export default function InvoiceList({ data, clientsById, filter, setFilter, sear
               <tr><th>Number</th><th>Type</th><th>Client</th><th>Issued</th><th>Due</th><th>Status</th><th style={{ textAlign: "right" }}>Total</th><th></th></tr>
             </thead>
             <tbody>
-              {list.map((inv) => {
+              {pageItems.map((inv) => {
                 const t = computeTotals(inv);
                 const st = displayStatus(inv);
                 return (
@@ -70,6 +82,7 @@ export default function InvoiceList({ data, clientsById, filter, setFilter, sear
             </tbody>
           </table>
         )}
+        <Pagination {...pagination} />
       </div>
     </div>
   );

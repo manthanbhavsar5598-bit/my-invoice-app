@@ -9,6 +9,8 @@ import {
   Filter,
 } from "lucide-react";
 import Stamp from "./Stamp";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import {
   computeTotals,
   money,
@@ -744,6 +746,9 @@ export default function Reports({
       profiles,
       appliedFilters,
     ]);
+
+    const pagination =
+    usePagination(filteredInvoices);
 
   // =======================================================
   // METRICS
@@ -2456,7 +2461,7 @@ export default function Reports({
 
               ) : (
 
-                filteredInvoices.map(
+                pagination.pageItems.map(
                   (invoice) => {
                     const client =
                       clientsById?.[
@@ -2727,6 +2732,8 @@ export default function Reports({
           </table>
 
         </div>
+
+        <Pagination {...pagination} />
 
       </div>
 

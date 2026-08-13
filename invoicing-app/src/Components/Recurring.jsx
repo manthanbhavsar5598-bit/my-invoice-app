@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Plus, Play, Pencil, Trash2 } from "lucide-react";
 import RecurringForm from "./RecurringForm";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import { uid, todayISO, computeTotals, fmtDate, money } from "../utils/helpers";
 
 function blankRecurring() {
@@ -11,6 +13,8 @@ export default function Recurring({ data, clientsById, onSave, onDelete, onGener
   const [editingId, setEditingId] = useState(null);
   const editing = editingId === "new" ? blankRecurring() : data.recurring.find((r) => r.id === editingId);
   const symbol = data.settings.currencySymbol;
+  const pagination = usePagination(data.recurring);
+  const { pageItems } = pagination;
 
   const handleSave = (r) => {
     onSave(r, editingId === "new");
@@ -37,7 +41,7 @@ export default function Recurring({ data, clientsById, onSave, onDelete, onGener
               <tr><th>Client</th><th>Frequency</th><th>Next due</th><th style={{ textAlign: "right" }}>Amount</th><th></th></tr>
             </thead>
             <tbody>
-              {data.recurring.map((r) => {
+              {pageItems.map((r) => {
                 const t = computeTotals(r);
                 const due = r.active && r.nextDate <= todayISO();
                 return (
@@ -59,6 +63,7 @@ export default function Recurring({ data, clientsById, onSave, onDelete, onGener
             </tbody>
           </table>
         )}
+        <Pagination {...pagination} />
       </div>
     </div>
   );

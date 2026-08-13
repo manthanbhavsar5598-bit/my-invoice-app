@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Save, Pencil, Trash2, RotateCcw, Download, Printer, Filter } from "lucide-react";
 import ClientPicker from "./ClientPicker";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import { money, todayISO, fmtDate } from "../utils/helpers";
 
 const EMPTY = {
@@ -77,6 +79,15 @@ export default function PurchaseInvoices({ clients, profiles = [], purchaseInvoi
       return true;
     });
   }, [purchaseInvoices, appliedFilters]);
+
+  const pagination = usePagination(filteredPurchaseInvoices);
+  const { pageItems, setPage } = pagination;
+  // Jump back to page 1 whenever the applied filters change so we
+  // never land on a page that no longer has any rows.
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedFilters]);
 
   const reset = () => setForm(EMPTY);
 
@@ -396,7 +407,7 @@ export default function PurchaseInvoices({ clients, profiles = [], purchaseInvoi
               </tr>
             </thead>
             <tbody>
-              {filteredPurchaseInvoices.map((pi) => (
+              {pageItems.map((pi) => (
                 <tr key={pi.id}>
                   <td>{pi.date}</td>
                   <td>{pi.billNo}</td>
@@ -425,6 +436,7 @@ export default function PurchaseInvoices({ clients, profiles = [], purchaseInvoi
             </tbody>
           </table>
         )}
+        <Pagination {...pagination} />
       </div>
     </div>
   );

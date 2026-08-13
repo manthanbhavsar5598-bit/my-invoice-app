@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 
-export default function ClientPicker({ clients, value, onChange }) {
+export default function ClientPicker({ clients, value, onChange, valueKey = "id", placeholder = "Search customers…" }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const selected = clients.find((c) => c.id === value);
+  const selected = clients.find((c) => c[valueKey] === value);
   const filtered = clients.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
@@ -12,7 +12,7 @@ export default function ClientPicker({ clients, value, onChange }) {
       <div style={{ position: "relative" }}>
         <Search size={14} style={{ position: "absolute", left: 10, top: 11, color: "var(--ink-soft)" }} />
         <input
-          placeholder="Search customers…"
+          placeholder={placeholder}
           value={open ? query : (selected ? selected.name : "")}
           onFocus={() => { setOpen(true); setQuery(""); }}
           onChange={(e) => setQuery(e.target.value)}
@@ -30,7 +30,7 @@ export default function ClientPicker({ clients, value, onChange }) {
             <div
               key={c.id}
               style={{ padding: "9px 12px", fontSize: 13, cursor: "pointer" }}
-              onMouseDown={() => { onChange(c.id); setQuery(""); setOpen(false); }}
+              onMouseDown={() => { onChange(c[valueKey]); setQuery(""); setOpen(false); }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--paper-dark)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >

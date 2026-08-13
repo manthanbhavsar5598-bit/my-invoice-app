@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import EntityForm from "./EntityForm";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import { uid, money } from "../utils/helpers";
 
 export default function Items({ items, settings, onSave, onDelete }) {
@@ -10,6 +12,8 @@ export default function Items({ items, settings, onSave, onDelete }) {
     : items.find((i) => i.id === editingId);
 
   const symbol = settings.currencySymbol;
+  const pagination = usePagination(items);
+  const { pageItems } = pagination;
 
   const handleSave = (item) => {
     onSave(item);
@@ -48,7 +52,7 @@ export default function Items({ items, settings, onSave, onDelete }) {
               <tr><th>Name</th><th>Description</th><th>HSN/SAC</th><th>Unit</th><th style={{ textAlign: "right" }}>Price</th><th></th></tr>
             </thead>
             <tbody>
-              {items.map((it) => (
+              {pageItems.map((it) => (
                 <tr key={it.id}>
                   <td>{it.name}</td>
                   <td>{it.description}</td>
@@ -66,6 +70,7 @@ export default function Items({ items, settings, onSave, onDelete }) {
             </tbody>
           </table>
         )}
+        <Pagination {...pagination} />
       </div>
     </div>
   );

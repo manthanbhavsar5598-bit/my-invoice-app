@@ -195,7 +195,13 @@ export default function InvoiceForm({ data, onSave }) {
             {inv.lineItems.map((li) => (
               <div key={li.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
                 <input type="date" value={li.date} onChange={(e) => updateLine(li.id, { date: e.target.value })} />
-                <input placeholder="Party name" value={li.partyName} onChange={(e) => updateLine(li.id, { partyName: e.target.value })} />
+                <ClientPicker
+                  clients={data.clients}
+                  value={li.partyName}
+                  onChange={(name) => updateLine(li.id, { partyName: name })}
+                  valueKey="name"
+                  placeholder="Party name"
+                />
                 <input type="number" min="0" step="0.01" placeholder="Weight" value={li.weight} onChange={(e) => updateLine(li.id, { weight: e.target.value })} />
                 <input type="number" min="0" step="0.01" placeholder="Rate" value={li.commission} onChange={(e) => updateLine(li.id, { commission: e.target.value })} />
                 <input className="lg-mono" disabled value={money(((Number(li.weight) || 0) * (Number(li.commission) || 0)).toFixed(2), symbol)} />

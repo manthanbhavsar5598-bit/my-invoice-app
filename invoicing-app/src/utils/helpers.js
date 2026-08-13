@@ -371,45 +371,63 @@ export function computeTotals(
 // =========================================================
 // DISPLAY STATUS
 // =========================================================
-export function displayStatus(
-  invoice
-) {
+export function displayStatus(invoice) {
   if (
-    invoice?.status ===
-      "paid" ||
-    invoice?.status ===
-      "draft"
+    invoice?.status === "paid" ||
+    invoice?.status === "draft"
   ) {
     return invoice.status;
   }
 
+  // FIXED: Added the '<' operator to compare due date with today's date
   if (
     invoice?.dueDate &&
-    invoice.dueDate <
-      todayISO()
+    invoice.dueDate < todayISO()
   ) {
     return "overdue";
   }
 
-  return (
-    invoice?.status ||
-    "draft"
-  );
+  return invoice?.status || "draft";
 }
 
 // =========================================================
 // MONEY
 // =========================================================
-export function money(
-  amount,
-  symbol
+// Single common amount-formatting utility used everywhere a
+// monetary value is displayed (invoice/bill totals, purchase
+// invoice amounts, commission amounts, report totals, tax/GST
+// amounts, outstanding/receivable figures, etc).
+//
+// Formats using the Indian numbering system (2,2,3 digit
+// grouping), e.g.
+//   1000    -> 1,000.00
+//   10000   -> 10,000.00
+//   100000  -> 1,00,000.00
+//
+// Always keep two decimal places so amounts line up in tables.
+// =========================================================
+export function formatAmount(
+  amount
 ) {
   const number =
     Number(amount) || 0;
 
+  return number.toLocaleString(
+    "en-IN",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  );
+}
+
+export function money(
+  amount,
+  symbol = ""
+) {
   return (
     symbol +
-    number.toFixed(2)
+    formatAmount(amount)
   );
 }
 

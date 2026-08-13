@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Save, Pencil, Trash2, RotateCcw, Filter, X } from "lucide-react";
 import ClientPicker from "./ClientPicker";
+import Pagination from "./Pagination";
+import { usePagination } from "../utils/usePagination";
 import { money, todayISO, fmtDate } from "../utils/helpers";
 
 const EMPTY = {
@@ -100,6 +102,15 @@ export default function CommissionEntries({
 
   const hasActiveFilters =
     filters.fromDate || filters.toDate || filters.fromCompany || filters.toCompany;
+
+  const pagination = usePagination(filteredCommissions);
+  const { pageItems, setPage } = pagination;
+  // Reset back to page 1 whenever the filters change so we don't
+  // land on a page that no longer has any rows.
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   return (
     <div>
@@ -245,7 +256,7 @@ export default function CommissionEntries({
               </tr>
             </thead>
             <tbody>
-              {filteredCommissions.map((c) => (
+              {pageItems.map((c) => (
                 <tr key={c.id}>
                   <td>{fmtDate(c.date)}</td>
                   <td>{clientsById[c.fromCompany]?.name || c.fromCompanyName || "—"}</td>
@@ -268,6 +279,7 @@ export default function CommissionEntries({
             </tbody>
           </table>
         )}
+        <Pagination {...pagination} />
       </div>
     </div>
   );

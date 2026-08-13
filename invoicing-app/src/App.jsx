@@ -36,6 +36,7 @@ import Login from "./Components/Login";
 import CommissionEntries from "./Components/CommissionEntries";
 
 import { api } from "./utils/api";
+import { setAuthToken } from "./utils/api";
 
 import "./App.css";
 
@@ -155,6 +156,8 @@ export default function App() {
       })
 
       .catch(() => {
+
+        setAuthToken(null);
 
         setAuthed(false);
 

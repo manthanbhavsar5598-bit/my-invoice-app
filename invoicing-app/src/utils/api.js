@@ -8,6 +8,43 @@ export const API_BASE =
   "http://localhost:5000/api/v1";
 
 // =========================================================
+// AUTH TOKEN (Bearer header)
+// =========================================================
+// The backend also sets an httpOnly cookie, but modern browsers
+// increasingly block third-party cookies between two different sites
+// (e.g. two separate *.vercel.app deployments), which silently breaks
+// cookie-only auth. Storing the JWT from the login/signup response and
+// sending it as an Authorization header sidesteps that entirely — the
+// backend's auth middleware already accepts either. Persisting to
+// localStorage keeps the session alive across page refreshes/new tabs.
+const TOKEN_KEY = "authToken";
+
+let authToken = null;
+try {
+  authToken = localStorage.getItem(TOKEN_KEY);
+} catch (error) {
+  // localStorage unavailable (e.g. private browsing) — fall back to
+  // cookie-only auth for this session.
+}
+
+export function setAuthToken(token) {
+  authToken = token || null;
+  try {
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+  } catch (error) {
+    // Ignore storage errors — the in-memory token still works for this tab.
+  }
+}
+
+export function getAuthToken() {
+  return authToken;
+}
+
+// =========================================================
 // REQUEST HELPER
 // =========================================================
 async function request(
@@ -22,6 +59,9 @@ async function request(
       headers: {
         "Content-Type":
           "application/json",
+        ...(authToken
+          ? { Authorization: `Bearer ${authToken}` }
+          : {}),
       },
 
       ...options,
@@ -557,37 +597,52 @@ export const api = {
         ).data.user
       ),
 
-    login: (
+    login: async (
       email,
       password
-    ) =>
-      post(
+    ) => {
+      const result = await post(
         "/auth/login",
         {
           email,
           password,
         }
-      ),
+      );
+      if (result?.token) {
+        setAuthToken(result.token);
+      }
+      return result;
+    },
 
-    signup: (
+    signup: async (
       name,
       email,
       password
-    ) =>
-      post(
+    ) => {
+      const result = await post(
         "/auth/signup",
         {
           name,
           email,
           password,
         }
-      ),
+      );
+      if (result?.token) {
+        setAuthToken(result.token);
+      }
+      return result;
+    },
 
-    logout: () =>
-      post(
-        "/auth/logout",
-        {}
-      ),
+    logout: async () => {
+      try {
+        return await post(
+          "/auth/logout",
+          {}
+        );
+      } finally {
+        setAuthToken(null);
+      }
+    },
 
     updatePassword: (
       currentPassword,

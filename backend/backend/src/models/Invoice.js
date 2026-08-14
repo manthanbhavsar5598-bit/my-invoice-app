@@ -24,6 +24,7 @@ const invoiceSchema = new mongoose.Schema(
     companyProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'CompanyProfile', default: null },
     number: { type: String, required: true },
     billType: { type: String, default: 'Invoice' },
+    billTitle: { type: String, trim: true, default: '' },
     stateType: { type: String, default: '' },
     items: {
       type: [lineItemSchema],

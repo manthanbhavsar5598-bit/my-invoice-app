@@ -27,6 +27,7 @@ function buildInvoiceHTML(invoice, business, client) {
   const blankRowCount = Math.max(0, MIN_ROWS - rows.length);
 
   const commission = isCommissionInvoice(invoice);
+  const billTitleText = commission && invoice.billTitle ? invoice.billTitle : invoiceTitleLabel(invoice.billType);
 
   const itemHeaderRow = commission
     ? `<tr style="background:#F0DFC0;">
@@ -119,12 +120,13 @@ function buildInvoiceHTML(invoice, business, client) {
     <div style="background:#fff;border-bottom:1px solid #1F2A3C;padding:12px 16px;text-align:center;">
       <span style="font-family:'Zilla Slab',serif;font-size:22px;font-weight:700;background:#F5D98C;padding:3px 14px;display:block;margin-left:-16px;margin-right:-16px;color:#000000;">${escapeHtml(business.name)}</span>
       <div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:6px;white-space:pre-line;color:#000000;">${escapeHtml(business.address)}</div>
+      ${business.panNumber && business.panNumber.trim() ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:4px;color:#000000;">PAN: ${escapeHtml(business.panNumber)}</div>` : ""}
       ${business.gstNumber ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:4px;color:#000000;">GSTIN: ${escapeHtml(business.gstNumber)}</div>` : ""}
       ${business.phone ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:3px;color:#000000;">Mobile: ${escapeHtml(business.phone)}</div>` : ""}
       ${business.email ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:3px;color:#000000;">Email: ${escapeHtml(business.email)}</div>` : ""}
     </div>
     <div style="text-align:center;font-weight:700;font-size:13px;letter-spacing:0.08em;padding:6px 0;border-bottom:1px solid #1F2A3C;background:${commission ? "transparent" : "#F7F3EA"};color:#000000;">
-      ${escapeHtml(invoiceTitleLabel(invoice.billType).toUpperCase())}
+      ${escapeHtml(billTitleText.toUpperCase())}
     </div>
 
     ${commission ? `
@@ -239,6 +241,8 @@ export default function PrintView({ invoice, business, client, onClose }) {
   const rows = invoice.lineItems.length ? invoice.lineItems : [];
   const MIN_ROWS = 10;
   const blankRowCount = Math.max(0, MIN_ROWS - rows.length);
+  const commission = isCommissionInvoice(invoice);
+  const billTitleText = commission && invoice.billTitle ? invoice.billTitle : invoiceTitleLabel(invoice.billType);
 
   function downloadStandaloneHTML() {
     const html = buildInvoiceHTML(invoice, business, client);
@@ -279,12 +283,13 @@ export default function PrintView({ invoice, business, client, onClose }) {
         <div style={{ background: "#fff", borderBottom: "1px solid #1F2A3C", padding: "12px 16px", textAlign: "center" }}>
           <span className="lg-display" style={{ fontSize: 22, fontWeight: 700, background: "#F5D98C", padding: "3px 14px", display: "block", marginLeft: -16, marginRight: -16, color: "#000000" }}>{business.name}</span>
           <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 6, whiteSpace: "pre-line", color: "#000000" }}>{business.address}</div>
+          {business.panNumber && business.panNumber.trim() && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 4, color: "#000000" }}>PAN: {business.panNumber}</div>}
           {business.gstNumber && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 4, color: "#000000" }}>GSTIN: {business.gstNumber}</div>}
           {business.phone && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 3, color: "#000000" }}>Mobile: {business.phone}</div>}
           {business.email && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 3, color: "#000000" }}>Email: {business.email}</div>}
         </div>
         <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", padding: "6px 0", borderBottom: "1px solid #1F2A3C", background: isCommissionInvoice(invoice) ? "transparent" : "#F7F3EA", color: "#000000" }}>
-          {invoiceTitleLabel(invoice.billType).toUpperCase()}
+          {billTitleText.toUpperCase()}
         </div>
 
         {isCommissionInvoice(invoice) ? (

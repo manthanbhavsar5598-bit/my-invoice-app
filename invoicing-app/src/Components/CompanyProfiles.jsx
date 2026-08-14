@@ -30,6 +30,7 @@ const emptyProfile = () => ({
   address: "",
 
   gstNumber: "",
+  panNumber: "",
 
   currencySymbol: "₹",
 
@@ -841,6 +842,17 @@ export default function CompanyProfiles({
                   )}
                   placeholder="Enter GST number"
                   icon={FileText}
+                />
+
+
+                <Field
+                  label="PAN Number"
+                  value={form.panNumber}
+                  onChange={setField(
+                    "panNumber"
+                  )}
+                  placeholder="Enter PAN number"
+                  icon={Hash}
                 />
 
 

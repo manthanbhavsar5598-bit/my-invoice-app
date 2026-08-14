@@ -13,6 +13,7 @@ function blankInvoice() {
     id: uid("inv"),
     number: "",
     billType: "Tax Invoice",
+    billTitle: "",
     companyProfileId: "",
     stateType: "",
     clientId: "",
@@ -95,6 +96,16 @@ export default function InvoiceForm({ data, onSave }) {
             {BILL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
+        {isCommissionInvoice(inv) && (
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Bill Title <span style={{ color: "var(--stamp-red)" }}>*</span></label>
+            <select value={inv.billTitle} onChange={(e) => setInv({ ...inv, billTitle: e.target.value })}>
+              <option value="">Select…</option>
+              <option value="Commission Invoice">Commission Invoice</option>
+              <option value="Tax Invoice">Tax Invoice</option>
+            </select>
+          </div>
+        )}
         <div style={{ marginBottom: 12 }}>
           <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Company profile</label>
           <select value={inv.companyProfileId} onChange={(e) => setInv({ ...inv, companyProfileId: e.target.value })}>

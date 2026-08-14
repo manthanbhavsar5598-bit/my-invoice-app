@@ -173,6 +173,8 @@ const mapProfile = (
     profile.address || "",
   gstNumber:
     profile.gstNumber || "",
+  panNumber:
+    profile.panNumber || "",
   currencySymbol:
     profile.currencySymbol ||
     "₹",
@@ -241,6 +243,9 @@ const mapInvoice = (
   billType:
     invoice.billType ||
     "Invoice",
+
+  billTitle:
+    invoice.billTitle || "",
 
   // -----------------------------------------------
   // COMPANY PROFILE ID
@@ -494,6 +499,9 @@ const invoiceToApi = (
 
     billType:
       invoice.billType,
+
+    billTitle:
+      invoice.billTitle,
 
     stateType:
       invoice.stateType,

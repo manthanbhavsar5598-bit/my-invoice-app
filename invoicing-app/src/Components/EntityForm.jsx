@@ -6,7 +6,7 @@ export default function EntityForm({ entity, fields, onSave, onCancel }) {
 
   return (
     <div className="lg-card" style={{ marginBottom: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="resp-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         {fields.map((f) => (
           <div key={f.key} style={f.type === "textarea" ? { gridColumn: "1 / -1" } : {}}>
             <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>{f.label}</label>

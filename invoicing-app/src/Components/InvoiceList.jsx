@@ -27,15 +27,15 @@ export default function InvoiceList({ data, clientsById, filter, setFilter, sear
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div className="resp-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 12 }}>
         <h1 className="lg-display" style={{ fontSize: 26, margin: 0 }}>Invoices</h1>
         <button className="lg-btn" onClick={onNew}><Plus size={15} /> New invoice</button>
       </div>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center" }}>
-        <div style={{ position: "relative", flex: 1, maxWidth: 280 }}>
+      <div className="resp-toolbar" style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center" }}>
+        <div style={{ position: "relative", flex: "1 1 200px", maxWidth: 280 }}>
           <Search size={14} style={{ position: "absolute", left: 10, top: 11, color: "var(--ink-soft)" }} />
-          <input placeholder="Search number or client" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 30 }} />
+          <input placeholder="Search number or client" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 30, width: "100%" }} />
         </div>
         <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{ width: 150 }}>
           <option value="all">All statuses</option>
@@ -50,6 +50,7 @@ export default function InvoiceList({ data, clientsById, filter, setFilter, sear
         {list.length === 0 ? (
           <div style={{ padding: 24, fontSize: 13, color: "var(--ink-soft)" }}>No invoices match.</div>
         ) : (
+          <div className="resp-scroll-x">
           <table className="lg-table">
             <thead>
               <tr><th>Number</th><th>Type</th><th>Client</th><th>Issued</th><th>Due</th><th>Status</th><th style={{ textAlign: "right" }}>Total</th><th></th></tr>
@@ -81,6 +82,7 @@ export default function InvoiceList({ data, clientsById, filter, setFilter, sear
               })}
             </tbody>
           </table>
+          </div>
         )}
         <Pagination {...pagination} />
       </div>

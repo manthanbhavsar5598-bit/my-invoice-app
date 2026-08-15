@@ -1548,6 +1548,7 @@ export default function Reports({
   // =======================================================
   return (
     <div
+      className="dash-shell"
       style={{
         background: "#FAFAFA",
         minHeight: "100vh",
@@ -1570,6 +1571,7 @@ export default function Reports({
       >
 
         <div
+          className="resp-filter-grid"
           style={{
             display: "grid",
             gridTemplateColumns:
@@ -1924,6 +1926,7 @@ export default function Reports({
           ================================================= */}
 
       <div
+        className="resp-kpi-grid"
         style={{
           display: "grid",
           gridTemplateColumns:
@@ -2238,12 +2241,14 @@ export default function Reports({
         {/* HEADER */}
 
         <div
+          className="resp-toolbar"
           style={{
             display: "flex",
             justifyContent:
               "space-between",
             alignItems: "center",
             marginBottom: 20,
+            gap: 12,
           }}
         >
 

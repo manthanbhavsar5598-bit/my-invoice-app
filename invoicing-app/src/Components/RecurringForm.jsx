@@ -24,7 +24,7 @@ export default function RecurringForm({ entity, data, onSave, onCancel }) {
 
   return (
     <div className="lg-card" style={{ marginBottom: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 12 }}>
+      <div className="resp-form-grid" data-cols="3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 12 }}>
         <div>
           <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Client</label>
           <select value={r.clientId} onChange={(e) => setR({ ...r, clientId: e.target.value })}>
@@ -47,6 +47,7 @@ export default function RecurringForm({ entity, data, onSave, onCancel }) {
         </div>
       </div>
 
+      <div className="resp-line-items">
       {r.lineItems.map((li) => (
         <div key={li.id} style={{ display: "grid", gridTemplateColumns: "3fr 70px 90px 30px", gap: 8, marginBottom: 8 }}>
           <input placeholder="Description" value={li.description} onChange={(e) => updateLine(li.id, { description: e.target.value })} />
@@ -55,6 +56,7 @@ export default function RecurringForm({ entity, data, onSave, onCancel }) {
           <button className="lg-btn-danger" onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>
         </div>
       ))}
+      </div>
       <button className="lg-btn-ghost" onClick={addLine}><Plus size={13} /> Add line</button>
 
       <div style={{ display: "flex", gap: 20, marginTop: 14, alignItems: "center" }}>

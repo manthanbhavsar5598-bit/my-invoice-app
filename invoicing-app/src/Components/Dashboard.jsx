@@ -66,10 +66,10 @@ export default function Dashboard({ data = {}, clientsById = {} }) {
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div style={{ background: "#FAFAFA", minHeight: "100vh", padding: "24px 32px", borderRadius: 12 }}>
+    <div className="dash-shell" style={{ background: "#FAFAFA", minHeight: "100vh", padding: "24px 32px", borderRadius: 12 }}>
       
       {/* Header Section */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 28 }}>
+      <div className="resp-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 28, gap: 16 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ledger-green)", background: "#E8F1EB", padding: "2px 8px", borderRadius: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>

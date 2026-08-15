@@ -8,7 +8,7 @@ export default function NavItem({ icon: Icon, label, path }) {
 
   return (
     <button className={"lg-tab" + (active ? " active" : "")} onClick={() => navigate(path)}>
-      <Icon size={16} /> {label}
+      <Icon size={16} /> <span>{label}</span>
     </button>
   );
 }

@@ -16,12 +16,59 @@ body,
   min-height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   min-height: 100vh;
 
   background: #f8fafc;
 
   overflow-x: hidden;
+}
+
+/* Responsive safety net: never let an oversized child force the
+   whole page to scroll sideways; images/svgs always scale down to
+   fit their container instead of overflowing it. */
+img,
+svg {
+  max-width: 100%;
+}
+
+/* Outside the Company Settings page, plain <input>/<select>/<textarea>
+   elements have no base width rule, so they render at the browser's
+   default intrinsic width (~170px) instead of filling whatever grid
+   or flex cell they sit in. That collapses to noticeably broken,
+   misaligned forms at every screen size, but is especially visible
+   once a form has to reflow to a single column on mobile. This is
+   additive only: any element that already sets its own inline width
+   (e.g. style={{ width: 70 }}) keeps that width untouched, since an
+   inline style always outranks this plain-selector rule. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+select,
+textarea {
+  width: 100%;
+}
+
+/* Sidebar nav labels: never wrap to a second line or overflow the
+   rail — a single clipped line (with ellipsis on truly long labels)
+   always looks better than a jagged mid-word wrap. */
+.lg-sidebar .lg-tab span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Comfortable, thumb-friendly tap targets on touch-sized viewports.
+   Excludes checkbox/radio/range/color inputs, which are meant to
+   stay compact, and anything explicitly opted out via .lg-tap-auto. */
+@media (max-width: 1024px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not(.lg-tap-auto),
+  select,
+  textarea {
+    min-height: 40px;
+  }
 }
 
 
@@ -1257,7 +1304,7 @@ body {
 }
 
 
-@media (max-width: 650px) {
+@media (max-width: 767px) {
 
   .lg-sidebar {
     width:
@@ -1593,10 +1640,13 @@ body {
   border-radius: 20px !important;
 }
 
-@media (max-width: 650px) {
+/* TABLET (768px - 1024px): collapse sidebar to an icon-only rail
+   so iPad-sized viewports get more room for page content while
+   keeping navigation reachable without a hamburger overlay. */
+@media (min-width: 768px) and (max-width: 1024px) {
   .lg-sidebar {
-    width: 68px !important;
-    min-width: 68px !important;
+    width: 72px !important;
+    min-width: 72px !important;
     height: 100vh !important;
     min-height: 100vh !important;
     padding: 14px 8px !important;
@@ -1633,6 +1683,17 @@ body {
   .lg-sidebar .lg-sidebar-logout span {
     display: none !important;
   }
+
+  .lg-main-content {
+    margin-left: 72px !important;
+    width: calc(100% - 72px) !important;
+    padding: 22px !important;
+  }
+
+  .company-settings-layout {
+    grid-template-columns: 260px minmax(0, 1fr) !important;
+    gap: 20px !important;
+  }
 }
 
 @media print {
@@ -1651,7 +1712,7 @@ body {
   display: none;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 767px) {
 
   .lg-mobile-menu-button {
     position: fixed;
@@ -1777,9 +1838,126 @@ body {
   }
 }
 
-@media (min-width: 651px) {
+@media (min-width: 768px) {
   .lg-mobile-menu-button,
   .lg-mobile-sidebar-overlay {
     display: none !important;
+  }
+}
+
+/* ==========================================================
+   RESPONSIVE UTILITIES
+   Added to fix overflow / wrapping bugs on mobile & tablet
+   without touching any component logic.
+   ========================================================== */
+
+/* Wrap any table or fixed-width grid that is naturally wider than
+   a small screen. Keeps the page itself from scrolling sideways -
+   only this boxed region scrolls, and only when it truly needs to. */
+.resp-scroll-x {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Generic responsive form grid: 2 (or 3) columns on desktop,
+   collapsing to a single column once space gets tight. Use
+   data-cols="3" for three-up grids. */
+.resp-form-grid {
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .resp-form-grid[data-cols="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .resp-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Line-item editors (invoice / recurring-invoice rows) use a fixed
+   multi-column pixel grid that needs real width to stay legible
+   (item name, qty, price, total...). Rather than squeezing those
+   columns unreadably thin on a phone, let this row become its own
+   horizontally scrollable strip so the rest of the page never
+   scrolls sideways. */
+@media (max-width: 900px) {
+  .resp-line-items {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .resp-line-items > * {
+    min-width: 640px;
+  }
+}
+
+/* Dashboard has its own inner padding on top of the app shell's
+   main-content padding; trim it on small screens so the two don't
+   stack into an oversized inset that eats the usable width. */
+@media (max-width: 767px) {
+  .dash-shell {
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .dash-shell {
+    padding: 20px !important;
+  }
+}
+
+/* Reports filter bar: rigid 6-equal-column grid on desktop
+   (from/to/company/customer/status/bill-type) has no room to
+   stay on one row past ~1024px, and would otherwise squeeze
+   every field unreadably thin or spill off the screen. */
+@media (max-width: 1024px) {
+  .resp-filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .resp-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .resp-filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Reports KPI cards: rigid 4-equal-column grid — reflow to 2
+   columns on tablet and 1 on narrow phones instead of squeezing
+   each metric card unreadably thin. */
+@media (max-width: 1024px) {
+  .resp-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .resp-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Toolbars / filter bars: allow search boxes, selects and buttons
+   to wrap onto new lines instead of being squashed or spilling off
+   the right edge of the screen. */
+@media (max-width: 767px) {
+  .resp-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .resp-toolbar > * {
+    min-width: 0;
   }
 }

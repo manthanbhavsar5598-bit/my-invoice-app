@@ -22,7 +22,7 @@ export default function Items({ items, settings, onSave, onDelete }) {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div className="resp-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 12 }}>
         <h1 className="lg-display" style={{ fontSize: 26, margin: 0 }}>Item catalog</h1>
         <button className="lg-btn" onClick={() => setEditingId("new")}><Plus size={15} /> Add item</button>
       </div>
@@ -47,6 +47,7 @@ export default function Items({ items, settings, onSave, onDelete }) {
         {items.length === 0 ? (
           <div style={{ padding: 24, fontSize: 13, color: "var(--ink-soft)" }}>No catalog items yet. Add services or products you bill often.</div>
         ) : (
+          <div className="resp-scroll-x">
           <table className="lg-table">
             <thead>
               <tr><th>Name</th><th>Description</th><th>HSN/SAC</th><th>Unit</th><th style={{ textAlign: "right" }}>Price</th><th></th></tr>
@@ -69,6 +70,7 @@ export default function Items({ items, settings, onSave, onDelete }) {
               ))}
             </tbody>
           </table>
+          </div>
         )}
         <Pagination {...pagination} />
       </div>

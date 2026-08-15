@@ -121,7 +121,7 @@ export default function InvoiceForm({ data, onSave }) {
 
       <div className="lg-card" style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: "var(--ink-soft)" }}>Header</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+        <div className="resp-form-grid" data-cols="3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
           <div>
             <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Invoice no <span style={{ fontWeight: 400 }}>— entered manually</span></label>
             <input className="lg-mono" placeholder="e.g. INV-1001" value={inv.number} onChange={(e) => setInv({ ...inv, number: e.target.value })} />
@@ -158,7 +158,7 @@ export default function InvoiceForm({ data, onSave }) {
             </select>
           </div>
           {inv.shipDispatchType && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="resp-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>{inv.shipDispatchType === "shipTo" ? "Ship to name" : "Dispatch from name"}</label>
                 <input value={inv.shipDispatchName} onChange={(e) => setInv({ ...inv, shipDispatchName: e.target.value })} />
@@ -177,7 +177,7 @@ export default function InvoiceForm({ data, onSave }) {
       )}
 
       {!isCommissionInvoice(inv) && (
-        <div className="lg-card" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+        <div className="lg-card resp-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
           <div>
             <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Transport details</label>
             <input value={inv.transportName} onChange={(e) => setInv({ ...inv, transportName: e.target.value })} placeholder="Transporter name" />
@@ -194,7 +194,7 @@ export default function InvoiceForm({ data, onSave }) {
           {isCommissionInvoice(inv) ? "Commission entries" : "Line items"}
         </div>
         {isCommissionInvoice(inv) ? (
-          <>
+          <div className="resp-line-items">
             <div style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 6 }}>
               <label style={{ fontSize: 11, color: "var(--ink-soft)" }}>Date</label>
               <label style={{ fontSize: 11, color: "var(--ink-soft)" }}>Party name</label>
@@ -204,7 +204,7 @@ export default function InvoiceForm({ data, onSave }) {
               <span />
             </div>
             {inv.lineItems.map((li) => (
-              <div key={li.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                <div key={li.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
                 <input type="date" value={li.date} onChange={(e) => updateLine(li.id, { date: e.target.value })} />
                 <ClientPicker
                   clients={data.clients}
@@ -216,12 +216,13 @@ export default function InvoiceForm({ data, onSave }) {
                 <input type="number" min="0" step="0.01" placeholder="Weight" value={li.weight} onChange={(e) => updateLine(li.id, { weight: e.target.value })} />
                 <input type="number" min="0" step="0.01" placeholder="Rate" value={li.commission} onChange={(e) => updateLine(li.id, { commission: e.target.value })} />
                 <input className="lg-mono" disabled value={money(((Number(li.weight) || 0) * (Number(li.commission) || 0)).toFixed(2), symbol)} />
-                <button className="lg-btn-danger" style={{ padding: "6px 8px" }} onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>
-              </div>
+                  <button className="lg-btn-danger" style={{ padding: "6px 8px" }} onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>
+                </div>
             ))}
-          </>
+          </div>
         ) : (
-          inv.lineItems.map((li) => (
+          <div className="resp-line-items">
+          {inv.lineItems.map((li) => (
             <div key={li.id} style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr 90px 80px 70px 120px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
               <select onChange={(e) => e.target.value && pickCatalogItem(li.id, e.target.value)} defaultValue="">
                 <option value="">From catalog…</option>
@@ -234,12 +235,13 @@ export default function InvoiceForm({ data, onSave }) {
               <input type="number" min="0" step="0.01" placeholder="Rate" value={li.price || ""} onChange={(e) => updateLine(li.id, { price: e.target.value })} />
               <button className="lg-btn-danger" style={{ padding: "6px 8px" }} onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>
             </div>
-          ))
+          ))}
+          </div>
         )}
         <button className="lg-btn-ghost" onClick={addLine}><Plus size={13} /> Add line</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16 }}>
+      <div className="resp-form-grid" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 16 }}>
         <div className="lg-card">
           <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Remarks <span style={{ fontWeight: 400 }}>— only prints if filled in</span></label>
           <textarea rows={5} value={inv.notes} onChange={(e) => setInv({ ...inv, notes: e.target.value })} placeholder="Optional — leave blank to hide this row on the printed invoice" />

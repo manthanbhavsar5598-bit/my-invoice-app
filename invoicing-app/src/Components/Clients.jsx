@@ -21,7 +21,7 @@ export default function Clients({ clients, invoices, onSave, onDelete }) {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div className="resp-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 12 }}>
         <h1 className="lg-display" style={{ fontSize: 26, margin: 0 }}>Clients</h1>
         <button className="lg-btn" onClick={() => setEditingId("new")}><Plus size={15} /> Add client</button>
       </div>
@@ -47,6 +47,7 @@ export default function Clients({ clients, invoices, onSave, onDelete }) {
         {clients.length === 0 ? (
           <div style={{ padding: 24, fontSize: 13, color: "var(--ink-soft)" }}>No clients yet.</div>
         ) : (
+          <div className="resp-scroll-x">
           <table className="lg-table">
             <thead>
               <tr><th>Name</th><th>Email</th><th>Phone</th><th>GST no</th><th>State code</th><th>Invoices</th><th></th></tr>
@@ -70,6 +71,7 @@ export default function Clients({ clients, invoices, onSave, onDelete }) {
               ))}
             </tbody>
           </table>
+          </div>
         )}
         <Pagination {...pagination} />
       </div>

@@ -23,7 +23,7 @@ export default function Recurring({ data, clientsById, onSave, onDelete, onGener
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div className="resp-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 12 }}>
         <h1 className="lg-display" style={{ fontSize: 26, margin: 0 }}>Recurring invoices</h1>
         <button className="lg-btn" onClick={() => setEditingId("new")}><Plus size={15} /> New template</button>
       </div>
@@ -36,6 +36,7 @@ export default function Recurring({ data, clientsById, onSave, onDelete, onGener
         {data.recurring.length === 0 ? (
           <div style={{ padding: 24, fontSize: 13, color: "var(--ink-soft)" }}>No recurring templates. Set one up for clients you bill on a schedule.</div>
         ) : (
+          <div className="resp-scroll-x">
           <table className="lg-table">
             <thead>
               <tr><th>Client</th><th>Frequency</th><th>Next due</th><th style={{ textAlign: "right" }}>Amount</th><th></th></tr>
@@ -62,6 +63,7 @@ export default function Recurring({ data, clientsById, onSave, onDelete, onGener
               })}
             </tbody>
           </table>
+          </div>
         )}
         <Pagination {...pagination} />
       </div>

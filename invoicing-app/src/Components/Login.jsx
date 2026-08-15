@@ -27,8 +27,8 @@ export default function Login({ onAuthed }) {
 
   if (mode === "forgot") {
     return (
-      <div style={{ minHeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 320 }}>
+      <div style={{ minHeight: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+        <div style={{ width: "100%", maxWidth: 320 }}>
           <ForgotPassword onDone={() => setMode("login")} />
           <div style={{ fontSize: 12, color: "var(--ink-soft)", marginTop: 12, textAlign: "center" }}>
             <a href="#" onClick={(e) => { e.preventDefault(); setMode("login"); }}>Back to sign in</a>
@@ -39,8 +39,8 @@ export default function Login({ onAuthed }) {
   }
 
   return (
-    <div style={{ minHeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <form onSubmit={submit} className="lg-card" style={{ width: 320 }}>
+    <div style={{ minHeight: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <form onSubmit={submit} className="lg-card" style={{ width: "100%", maxWidth: 320 }}>
         <div className="lg-display" style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Ledger</div>
         <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 18 }}>
           {mode === "login" ? "Sign in to your account" : "Create an account"}

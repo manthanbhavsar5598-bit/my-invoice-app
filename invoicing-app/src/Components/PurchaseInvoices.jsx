@@ -373,7 +373,7 @@ export default function PurchaseInvoices({ clients, profiles = [], purchaseInvoi
 
       {/* TABLE */}
       <div className="lg-card" style={{ padding: 0, overflowX: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, padding: "14px 16px 0" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 10, padding: "14px 16px 0" }}>
           <button className="lg-btn-ghost" onClick={handleExportCSV} style={{ fontSize: 13, padding: "7px 14px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6 }}>
             <Download size={14} /> CSV
           </button>

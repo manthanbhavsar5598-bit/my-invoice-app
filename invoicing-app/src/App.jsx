@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   HandCoins,
+  FlaskConical,
 } from "lucide-react";
 
 import NavItem from "./Components/NavItem";
@@ -831,6 +832,8 @@ export default function App() {
 
       background:
         var(--paper);
+
+      min-height: 100vh;
     }
 
     .lg-display {
@@ -1438,8 +1441,8 @@ export default function App() {
 
               <div className="lg-brand-mark">
 
-                <Building2
-                  size={18}
+                <FlaskConical
+                  size={17}
                   strokeWidth={2.2}
                 />
 
@@ -1448,7 +1451,7 @@ export default function App() {
               <div className="lg-brand-title-wrap">
 
                 <div className="lg-display lg-brand-title">
-                  BILLING SOFTWARE
+                  NARNARAYAN CHEM
                 </div>
 
               </div>

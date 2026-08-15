@@ -1465,6 +1465,23 @@ textarea {
   flex-shrink: 0 !important;
 }
 
+.lg-brand-mark {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+
+  border-radius: 10px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  color: #ffffff !important;
+
+  background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%) !important;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35) !important;
+}
+
 .lg-brand-title-wrap {
   min-width: 0 !important;
   display: flex !important;
@@ -1482,13 +1499,17 @@ textarea {
     Arial,
     sans-serif !important;
 
-  font-size: 15px !important;
-  line-height: 1 !important;
+  font-size: 12.5px !important;
+  line-height: 1.15 !important;
   font-weight: 800 !important;
 
-  letter-spacing: .04em !important;
+  letter-spacing: .02em !important;
 
   white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  display: block !important;
 }
 
 .lg-brand-subtitle {
@@ -1946,6 +1967,20 @@ textarea {
 @media (max-width: 480px) {
   .resp-kpi-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* The printable invoice sheet is deliberately wide (a real document
+   layout) and sits in a horizontally-scrollable strip below ~900px.
+   `margin: 0 auto` (used to center it on screens wide enough to fit
+   it) breaks scrolling in that state - the browser reserves the
+   centering space but starts the scroll position partway into the
+   content, clipping the true left edge. Once it must scroll, drop
+   the auto-centering so the sheet starts flush at the scrollable
+   strip's left edge instead. */
+@media (max-width: 900px) {
+  .lg-print-area {
+    margin: 0 !important;
   }
 }
 

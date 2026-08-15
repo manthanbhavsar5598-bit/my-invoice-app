@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Printer, Download, ChevronLeft } from "lucide-react";
 import { computeTotals, isCommissionInvoice, invoiceTitleLabel, fmtDate, escapeHtml, money, amountInWords } from "../utils/helpers";
 
@@ -244,6 +244,20 @@ export default function PrintView({ invoice, business, client, onClose }) {
   const commission = isCommissionInvoice(invoice);
   const billTitleText = commission && invoice.billTitle ? invoice.billTitle : invoiceTitleLabel(invoice.billType);
 
+  // On narrow screens the invoice sheet below is wider than the viewport
+  // and scrolls horizontally within its own box. Some mobile browsers
+  // (notably iOS Safari) don't reliably start that scroll position at the
+  // true left edge on first render, which visually clips the left side of
+  // the sheet. Forcing it to 0 right after mount guarantees the full
+  // document is reachable. This only ever touches scroll position, never
+  // invoice data or calculations.
+  const scrollRef = useRef(null);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = 0;
+    }
+  }, []);
+
   function downloadStandaloneHTML() {
     const html = buildInvoiceHTML(invoice, business, client);
     const blob = new Blob([html], { type: "text/html;charset=utf-8;" });
@@ -264,6 +278,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
           @page { size: auto; margin: 0 !important; }
           body { padding: 1.5cm !important; margin: 0 !important; }
           .lg-noprint { display: none !important; }
+          .lg-print-scroll { overflow: visible !important; width: auto !important; }
         }
       `}</style>
       <div className="lg-noprint" style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
@@ -275,7 +290,8 @@ export default function PrintView({ invoice, business, client, onClose }) {
         If the print button above doesn't open a dialog, use "Download printable file" — open the downloaded file in your browser and print or save it as a PDF from there.
       </div>
 
-      <div className="lg-print-area" style={{ fontFamily: "Inter, sans-serif", color: "#000000", background: "#fff", maxWidth: 900, margin: "0 auto", border: "1px solid #1F2A3C" }}>
+      <div className="lg-print-scroll resp-scroll-x" ref={scrollRef}>
+      <div className="lg-print-area" style={{ fontFamily: "Inter, sans-serif", color: "#000000", background: "#fff", maxWidth: 900, minWidth: 620, margin: "0 auto", border: "1px solid #1F2A3C" }}>
         <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", padding: "6px 0", borderBottom: "1px solid #1F2A3C", color: "#8B0000" }}>
           JAY SWAMINARAYAN
         </div>
@@ -483,6 +499,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

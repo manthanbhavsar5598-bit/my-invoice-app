@@ -56,7 +56,7 @@ exports.getInvoices = catchAsync(async (req, res) => {
   if (req.query.status) filter.status = req.query.status;
   if (req.query.client) filter.client = req.query.client;
 
-  const invoices = await Invoice.find(filter).sort('-createdAt');
+  const invoices = await Invoice.find(filter).sort('-createdAt').lean();
   res.status(200).json({ success: true, results: invoices.length, data: { invoices } });
 });
 

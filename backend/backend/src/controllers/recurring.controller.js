@@ -18,7 +18,7 @@ exports.createRecurring = catchAsync(async (req, res) => {
 });
 
 exports.getRecurring = catchAsync(async (req, res) => {
-  const recurring = await Recurring.find({ owner: req.user.id }).sort('-createdAt');
+  const recurring = await Recurring.find({ owner: req.user.id }).sort('-createdAt').lean();
   res.status(200).json({ success: true, results: recurring.length, data: { recurring } });
 });
 

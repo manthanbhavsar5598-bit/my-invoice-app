@@ -11,7 +11,8 @@ exports.createPurchaseInvoice = catchAsync(async (req, res) => {
 exports.getPurchaseInvoices = catchAsync(async (req, res) => {
   const invoices = await PurchaseInvoice.find({ owner: req.user.id })
     .populate('billFrom')
-    .sort('-date -createdAt');
+    .sort('-date -createdAt')
+    .lean();
   res.status(200).json({ success: true, results: invoices.length, data: { purchaseInvoices: invoices } });
 });
 

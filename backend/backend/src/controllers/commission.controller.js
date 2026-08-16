@@ -22,7 +22,8 @@ exports.getCommissions = catchAsync(async (req, res) => {
 
   const commissions = await Commission.find(filter)
     .populate(['fromCompany', 'toCompany', 'item'])
-    .sort('-date -createdAt');
+    .sort('-date -createdAt')
+    .lean();
 
   res.status(200).json({ success: true, results: commissions.length, data: { commissions } });
 });

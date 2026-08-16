@@ -56,6 +56,9 @@ const invoiceSchema = new mongoose.Schema(
 invoiceSchema.index({ owner: 1, number: 1 }, { unique: true });
 invoiceSchema.index({ owner: 1, status: 1 });
 invoiceSchema.index({ owner: 1, client: 1 });
+// Covers the getInvoices list query (find by owner, sort by -createdAt)
+// so it can be served entirely from the index with no in-memory sort.
+invoiceSchema.index({ owner: 1, createdAt: -1 });
 
 // Recalculate totals server-side on every save so the client can never
 // forge amounts by sending a manipulated total. Commission invoices are

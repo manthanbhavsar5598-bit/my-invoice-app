@@ -8,7 +8,7 @@ exports.createProfile = catchAsync(async (req, res) => {
 });
 
 exports.getProfiles = catchAsync(async (req, res) => {
-  const profiles = await CompanyProfile.find({ owner: req.user.id }).sort('-createdAt');
+  const profiles = await CompanyProfile.find({ owner: req.user.id }).sort('-createdAt').lean();
   res.status(200).json({ success: true, results: profiles.length, data: { profiles } });
 });
 

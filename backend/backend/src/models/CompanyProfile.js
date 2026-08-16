@@ -22,4 +22,7 @@ const companyProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Covers the getProfiles list query (find by owner, sort by -createdAt).
+companyProfileSchema.index({ owner: 1, createdAt: -1 });
+
 module.exports = mongoose.model('CompanyProfile', companyProfileSchema);

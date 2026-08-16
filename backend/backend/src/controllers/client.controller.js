@@ -9,7 +9,7 @@ exports.createClient = catchAsync(async (req, res) => {
 
 exports.getClients = catchAsync(async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
+  const limit = Math.min(parseInt(req.query.limit, 10) || 20, 2000);
   const skip = (page - 1) * limit;
 
   const filter = { owner: req.user.id };
@@ -18,7 +18,7 @@ exports.getClients = catchAsync(async (req, res) => {
   }
 
   const [clients, total] = await Promise.all([
-    Client.find(filter).sort('-createdAt').skip(skip).limit(limit),
+    Client.find(filter).sort('-createdAt').skip(skip).limit(limit).lean(),
     Client.countDocuments(filter)
   ]);
 

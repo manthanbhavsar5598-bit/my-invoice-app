@@ -12,4 +12,7 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Covers the getItems list query (find by owner, sort by -createdAt).
+itemSchema.index({ owner: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Item', itemSchema);

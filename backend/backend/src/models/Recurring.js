@@ -28,4 +28,7 @@ const recurringSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Covers the getRecurring list query (find by owner, sort by -createdAt).
+recurringSchema.index({ owner: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Recurring', recurringSchema);

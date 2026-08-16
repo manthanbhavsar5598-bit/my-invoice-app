@@ -8,7 +8,7 @@ exports.createItem = catchAsync(async (req, res) => {
 });
 
 exports.getItems = catchAsync(async (req, res) => {
-  const items = await Item.find({ owner: req.user.id }).sort('-createdAt');
+  const items = await Item.find({ owner: req.user.id }).sort('-createdAt').lean();
   res.status(200).json({ success: true, results: items.length, data: { items } });
 });
 

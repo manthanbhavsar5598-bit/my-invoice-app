@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import {
   Routes,
   Route,
@@ -24,17 +24,21 @@ import {
 } from "lucide-react";
 
 import NavItem from "./Components/NavItem";
-import Dashboard from "./Components/Dashboard";
-import Invoices from "./Components/Invoices";
-import PurchaseInvoices from "./Components/PurchaseInvoices";
-import Clients from "./Components/Clients";
-import CompanyProfiles from "./Components/CompanyProfiles";
-import Items from "./Components/Items";
-import Recurring from "./Components/Recurring";
-import Reports from "./Components/Reports";
-import Settings from "./Components/Settings";
 import Login from "./Components/Login";
-import CommissionEntries from "./Components/CommissionEntries";
+
+// Every other page is only needed once its route is actually visited, so
+// each is a separate chunk fetched on demand instead of bloating the one
+// bundle everyone downloads just to see the login screen or Dashboard.
+const Dashboard = lazy(() => import("./Components/Dashboard"));
+const Invoices = lazy(() => import("./Components/Invoices"));
+const PurchaseInvoices = lazy(() => import("./Components/PurchaseInvoices"));
+const Clients = lazy(() => import("./Components/Clients"));
+const CompanyProfiles = lazy(() => import("./Components/CompanyProfiles"));
+const Items = lazy(() => import("./Components/Items"));
+const Recurring = lazy(() => import("./Components/Recurring"));
+const Reports = lazy(() => import("./Components/Reports"));
+const Settings = lazy(() => import("./Components/Settings"));
+const CommissionEntries = lazy(() => import("./Components/CommissionEntries"));
 
 import { api } from "./utils/api";
 import { setAuthToken } from "./utils/api";
@@ -89,7 +93,7 @@ export default function App() {
   // LOAD ALL DATA
   // ==========================================================
 
-  async function loadAll() {
+  async function loadAll(prefetchedSettings) {
 
     setLoading(true);
 
@@ -108,7 +112,7 @@ export default function App() {
         api.clients.list(),
         api.items.list(),
         api.profiles.list(),
-        api.auth.me(),
+        prefetchedSettings ? Promise.resolve(prefetchedSettings) : api.auth.me(),
         api.invoices.list(),
         api.purchaseInvoices.list(),
         api.commissions.list(),
@@ -148,11 +152,11 @@ export default function App() {
 
     api.auth.me()
 
-      .then(() => {
+      .then((settings) => {
 
         setAuthed(true);
 
-        return loadAll();
+        return loadAll(settings);
 
       })
 
@@ -1626,6 +1630,18 @@ export default function App() {
 
           ) : (
 
+            <Suspense
+              fallback={
+                <div className="lg-loading">
+
+                  <div className="lg-loading-spinner" />
+
+                  Loading…
+
+                </div>
+              }
+            >
+
             <Routes>
 
               <Route
@@ -1821,6 +1837,8 @@ export default function App() {
               />
 
             </Routes>
+
+            </Suspense>
 
           )}
 

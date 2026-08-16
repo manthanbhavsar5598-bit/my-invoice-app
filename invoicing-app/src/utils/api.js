@@ -711,7 +711,7 @@ export const api = {
     list: async () =>
       (
         await get(
-          "/clients?limit=100"
+          "/clients?limit=2000"
         )
       ).data.clients.map(
         mapClient

@@ -195,7 +195,7 @@ export default function InvoiceForm({ data, onSave }) {
         </div>
         {isCommissionInvoice(inv) ? (
           <div className="resp-line-items">
-            <div style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "140px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 6 }}>
               <label style={{ fontSize: 11, color: "var(--ink-soft)" }}>Date</label>
               <label style={{ fontSize: 11, color: "var(--ink-soft)" }}>Party name</label>
               <label style={{ fontSize: 11, color: "var(--ink-soft)" }}>Total weight</label>
@@ -204,7 +204,7 @@ export default function InvoiceForm({ data, onSave }) {
               <span />
             </div>
             {inv.lineItems.map((li) => (
-                <div key={li.id} style={{ display: "grid", gridTemplateColumns: "110px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
+                <div key={li.id} style={{ display: "grid", gridTemplateColumns: "140px 1.4fr 100px 100px 100px 30px", gap: 8, marginBottom: 8, alignItems: "center" }}>
                 <input type="date" value={li.date} onChange={(e) => updateLine(li.id, { date: e.target.value })} />
                 <ClientPicker
                   clients={data.clients}
@@ -214,7 +214,20 @@ export default function InvoiceForm({ data, onSave }) {
                   placeholder="Party name"
                   allowCustom
                 />
-                <input type="number" min="0" step="0.01" placeholder="Weight" value={li.weight} onChange={(e) => updateLine(li.id, { weight: e.target.value })} />
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Weight"
+                  value={li.weight}
+                  onChange={(e) => updateLine(li.id, { weight: e.target.value })}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value);
+                    if (e.target.value !== "" && !Number.isNaN(n)) {
+                      updateLine(li.id, { weight: n.toFixed(2) });
+                    }
+                  }}
+                />
                 <input type="number" min="0" step="0.01" placeholder="Rate" value={li.commission} onChange={(e) => updateLine(li.id, { commission: e.target.value })} />
                 <input className="lg-mono" disabled value={money(((Number(li.weight) || 0) * (Number(li.commission) || 0)).toFixed(2), symbol)} />
                   <button className="lg-btn-danger" style={{ padding: "6px 8px" }} onClick={() => removeLine(li.id)}><Trash2 size={12} /></button>

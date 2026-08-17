@@ -1,11 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Search } from "lucide-react";
 
 export default function ClientPicker({ clients, value, onChange, valueKey = "id", placeholder = "Search customers…", allowCustom = false }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [menuRect, setMenuRect] = useState(null);
+  const wrapRef = useRef(null);
   const selected = clients.find((c) => c[valueKey] === value);
   const filtered = clients.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()));
+
+  // The dropdown is rendered in a portal (see below) so a scrollable or
+  // overflow-clipped ancestor — e.g. a horizontally-scrollable line-item
+  // row — can never cut it off. Since it's no longer a normal DOM child
+  // of this input, its position has to be measured and tracked manually.
+  const updateMenuRect = useCallback(() => {
+    if (wrapRef.current) {
+      const r = wrapRef.current.getBoundingClientRect();
+      setMenuRect({ top: r.bottom, left: r.left, width: r.width });
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updateMenuRect();
+    window.addEventListener("scroll", updateMenuRect, true);
+    window.addEventListener("resize", updateMenuRect);
+    return () => {
+      window.removeEventListener("scroll", updateMenuRect, true);
+      window.removeEventListener("resize", updateMenuRect);
+    };
+  }, [open, updateMenuRect]);
 
   // When allowCustom is on, a typed name that doesn't match any saved
   // client is still a valid value (e.g. a one-off party not yet in the
@@ -18,7 +43,7 @@ export default function ClientPicker({ clients, value, onChange, valueKey = "id"
   }
 
   return (
-    <div style={{ position: "relative" }}>
+    <div ref={wrapRef} style={{ position: "relative" }}>
       <div style={{ position: "relative" }}>
         <Search size={14} style={{ position: "absolute", left: 10, top: 11, color: "var(--ink-soft)" }} />
         <input
@@ -30,8 +55,23 @@ export default function ClientPicker({ clients, value, onChange, valueKey = "id"
           style={{ paddingLeft: 30 }}
         />
       </div>
-      {open && (
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "1px solid var(--line)", borderRadius: 4, marginTop: 4, maxHeight: 200, overflowY: "auto", zIndex: 10, boxShadow: "0 4px 10px rgba(0,0,0,0.08)" }}>
+      {open && menuRect && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            top: menuRect.top,
+            left: menuRect.left,
+            width: menuRect.width,
+            background: "#fff",
+            border: "1px solid var(--line)",
+            borderRadius: 4,
+            marginTop: 4,
+            maxHeight: 200,
+            overflowY: "auto",
+            zIndex: 1000,
+            boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+          }}
+        >
           {clients.length === 0 ? (
             <div style={{ padding: 10, fontSize: 13, color: "var(--ink-soft)" }}>
               {allowCustom ? "No saved clients yet — you can still type a name to use it directly." : "No clients yet — add one from the Clients tab."}
@@ -51,7 +91,8 @@ export default function ClientPicker({ clients, value, onChange, valueKey = "id"
               {c.name}
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

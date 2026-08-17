@@ -13,6 +13,14 @@ function formatDate(dateStr) {
   return dateStr;
 }
 
+// Formats a weight value to always show 2 decimal places (e.g. 10540 -> "10540.00")
+// for consistent, easy-to-scan figures on the printed invoice. Falls back to the
+// raw value if it isn't a plain number (e.g. blank).
+function fmtWeight(v) {
+  const n = Number(v);
+  return v !== "" && v != null && Number.isFinite(n) ? n.toFixed(2) : (v ?? "");
+}
+
 function buildInvoiceHTML(invoice, business, client) {
   const totals = computeTotals(invoice);
   const symbol = business.currencySymbol;
@@ -54,7 +62,7 @@ function buildInvoiceHTML(invoice, business, client) {
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${idx + 1}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;white-space:nowrap;">${formatDate(li.date)}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;">${escapeHtml(li.partyName)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(li.weight)}</td>
+        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(fmtWeight(li.weight))}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(li.commission)}</td>
         <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:right;font-family:'IBM Plex Mono',monospace;">${money((Number(li.weight) || 0) * (Number(li.commission) || 0), symbol)}</td>
       </tr>`).join("")
@@ -393,7 +401,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{idx + 1}</td>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center", whiteSpace: "nowrap" }}>{formatDate(li.date)}</td>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000" }}>{li.partyName}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.weight}</td>
+                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{fmtWeight(li.weight)}</td>
                     <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.commission}</td>
                     <td className="lg-mono" style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>
                       {money((Number(li.weight) || 0) * (Number(li.commission) || 0), symbol)}

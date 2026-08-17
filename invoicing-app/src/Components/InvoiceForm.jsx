@@ -212,6 +212,7 @@ export default function InvoiceForm({ data, onSave }) {
                   onChange={(name) => updateLine(li.id, { partyName: name })}
                   valueKey="name"
                   placeholder="Party name"
+                  allowCustom
                 />
                 <input type="number" min="0" step="0.01" placeholder="Weight" value={li.weight} onChange={(e) => updateLine(li.id, { weight: e.target.value })} />
                 <input type="number" min="0" step="0.01" placeholder="Rate" value={li.commission} onChange={(e) => updateLine(li.id, { commission: e.target.value })} />

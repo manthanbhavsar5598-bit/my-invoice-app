@@ -121,6 +121,10 @@ export default function PrintView({ invoice, business, client, onClose }) {
       <style>{`
         @media print {
           @page { size: A4; margin: 0; }
+          html, body, #root, .lg-app, .lg-app-shell, .lg-main-content {
+            height: auto !important;
+            min-height: 0 !important;
+          }
           body { padding: 0.5cm !important; margin: 0 !important; }
           .lg-noprint { display: none !important; }
           .lg-print-scroll { overflow: visible !important; width: auto !important; }

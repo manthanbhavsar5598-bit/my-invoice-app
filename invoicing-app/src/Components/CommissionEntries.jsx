@@ -18,8 +18,7 @@ const EMPTY = {
 const EMPTY_FILTERS = {
   fromDate: "",
   toDate: "",
-  fromCompany: "",
-  toCompany: "",
+  company: "",
 };
 
 export default function CommissionEntries({
@@ -93,15 +92,14 @@ export default function CommissionEntries({
       commissions.filter((c) => {
         if (filters.fromDate && (!c.date || c.date < filters.fromDate)) return false;
         if (filters.toDate && (!c.date || c.date > filters.toDate)) return false;
-        if (filters.fromCompany && c.fromCompany !== filters.fromCompany) return false;
-        if (filters.toCompany && c.toCompany !== filters.toCompany) return false;
+        if (filters.company && c.fromCompany !== filters.company && c.toCompany !== filters.company) return false;
         return true;
       }),
     [commissions, filters]
   );
 
   const hasActiveFilters =
-    filters.fromDate || filters.toDate || filters.fromCompany || filters.toCompany;
+    filters.fromDate || filters.toDate || filters.company;
 
   const pagination = usePagination(filteredCommissions);
   const { pageItems, setPage } = pagination;
@@ -202,19 +200,8 @@ export default function CommissionEntries({
             <input type="date" value={filters.toDate} onChange={setFilter("toDate")} />
           </Field>
 
-          <Field label="From company">
-            <select value={filters.fromCompany} onChange={setFilter("fromCompany")}>
-              <option value="">All companies</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="To company">
-            <select value={filters.toCompany} onChange={setFilter("toCompany")}>
+          <Field label="Company">
+            <select value={filters.company} onChange={setFilter("company")}>
               <option value="">All companies</option>
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>

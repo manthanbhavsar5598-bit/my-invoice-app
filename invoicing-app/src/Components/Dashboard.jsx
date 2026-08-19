@@ -4,10 +4,9 @@ import {
   Plus, 
   BarChart3, 
   Wallet, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock3, 
   TrendingUp, 
+  IndianRupee,
+  Building2,
   FileText, 
   ArrowRight,
   Sparkles
@@ -15,24 +14,48 @@ import {
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import Metric from "./Metric";
 import Stamp from "./Stamp";
-import { todayISO, displayStatus, computeTotals, money, fmtDate } from "../utils/helpers";
+import { todayISO, displayStatus, computeTotals, money, fmtDate, resolveProfile } from "../utils/helpers";
+
+// Compact Indian-style number formatting for the chart's value axis
+// (₹1,00,00,000 -> 1.0Cr, ₹1,50,000 -> 1.5L, ₹25,000 -> 25K) so large
+// totals never get clipped inside the axis column.
+const formatAxisValue = (value) => {
+  const n = Number(value) || 0;
+  const abs = Math.abs(n);
+  if (abs >= 1_00_00_000) return `${(n / 1_00_00_000).toFixed(1)}Cr`;
+  if (abs >= 1_00_000) return `${(n / 1_00_000).toFixed(1)}L`;
+  if (abs >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
+  return String(n);
+};
 
 export default function Dashboard({ data = {}, clientsById = {} }) {
   const navigate = useNavigate();
   const symbol = data?.settings?.currencySymbol || "₹";
   const invoices = data?.invoices || [];
-  const recurring = data?.recurring || [];
+  const profiles = data?.profiles || [];
 
   const outstanding = invoices.filter((i) => displayStatus(i) === "sent" || displayStatus(i) === "overdue");
   const outstandingTotal = outstanding.reduce((s, i) => s + computeTotals(i).total, 0);
-  const overdueCount = invoices.filter((i) => displayStatus(i) === "overdue").length;
 
-  const thisMonth = todayISO().slice(0, 7);
-  const paidThisMonth = invoices
-    .filter((i) => i.status === "paid" && (i.paidDate || "").slice(0, 7) === thisMonth)
+  // Total revenue: value of every non-draft invoice raised (matches the
+  // same "exclude drafts" rule the analytics chart below already uses).
+  const totalRevenue = invoices
+    .filter((i) => i.status !== "draft")
     .reduce((s, i) => s + computeTotals(i).total, 0);
 
-  const dueRecurring = recurring.filter((r) => r.active && r.nextDate <= todayISO()).length;
+  // Invoice count grouped by the company profile that issued it, e.g.
+  // [{ name: "Acme Co", count: 10 }, { name: "Beta LLC", count: 5 }, ...]
+  const companyInvoiceCounts = useMemo(() => {
+    const counts = new Map();
+    invoices.forEach((inv) => {
+      const profile = resolveProfile(profiles, inv.companyProfileId);
+      const name = profile?.name || "No company profile";
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [invoices, profiles]);
 
   // Fixed Monthly Analytics Data Calculation
   const chartData = useMemo(() => {
@@ -61,6 +84,9 @@ export default function Dashboard({ data = {}, clientsById = {} }) {
       return { name: m.label, revenue: Math.round(total * 100) / 100 };
     });
   }, [invoices]);
+
+  // The last bucket in chartData is always the current month.
+  const monthlyRevenue = chartData.length ? chartData[chartData.length - 1].revenue : 0;
 
   const recent = [...invoices].sort((a, b) => (b.issueDate || "").localeCompare(a.issueDate || "")).slice(0, 6);
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric", year: "numeric" });
@@ -106,13 +132,48 @@ export default function Dashboard({ data = {}, clientsById = {} }) {
           <Metric icon={Wallet} label="Outstanding" value={money(outstandingTotal, symbol)} accent="var(--gold)" tint="#FBF1DE" />
         </div>
         <div style={{ transition: "transform 0.2s, box-shadow 0.2s", borderRadius: 12 }} className="metric-card-hover">
-          <Metric icon={AlertTriangle} label="Overdue Invoices" value={String(overdueCount)} accent="var(--stamp-red)" tint="#FBE9E6" />
+          <Metric icon={TrendingUp} label="Monthly Revenue" value={money(monthlyRevenue, symbol)} accent="var(--ledger-green)" tint="#E8F1EB" />
         </div>
         <div style={{ transition: "transform 0.2s, box-shadow 0.2s", borderRadius: 12 }} className="metric-card-hover">
-          <Metric icon={CheckCircle2} label="Paid This Month" value={money(paidThisMonth, symbol)} accent="var(--ledger-green)" tint="#E8F1EB" />
+          <Metric icon={IndianRupee} label="Total Revenue" value={money(totalRevenue, symbol)} accent="var(--ink)" tint="#F0EFEC" />
         </div>
         <div style={{ transition: "transform 0.2s, box-shadow 0.2s", borderRadius: 12 }} className="metric-card-hover">
-          <Metric icon={Clock3} label="Recurring Due" value={String(dueRecurring)} accent="var(--ink)" tint="#F0EFEC" />
+          <Metric
+            icon={Building2}
+            label="Invoices by Company"
+            accent="var(--stamp-red)"
+            tint="#FBE9E6"
+            value={
+              companyInvoiceCounts.length === 0 ? (
+                <span style={{ fontSize: 15, fontWeight: 500, color: "var(--ink-soft)" }}>No invoices yet</span>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  {companyInvoiceCounts.slice(0, 3).map((c) => (
+                    <div key={c.name} style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+                      <span style={{
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: "var(--ink-soft)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
+                      }}>
+                        {c.name}
+                      </span>
+                      <span className="lg-mono" style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", flexShrink: 0 }}>
+                        {c.count}
+                      </span>
+                    </div>
+                  ))}
+                  {companyInvoiceCounts.length > 3 && (
+                    <div style={{ fontSize: 11, color: "var(--ink-soft)" }}>
+                      +{companyInvoiceCounts.length - 3} more
+                    </div>
+                  )}
+                </div>
+              )
+            }
+          />
         </div>
       </div>
 
@@ -135,7 +196,7 @@ export default function Dashboard({ data = {}, clientsById = {} }) {
 
         <div style={{ height: 220, minWidth: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#4E8A66" stopOpacity={1} />
@@ -144,7 +205,14 @@ export default function Dashboard({ data = {}, clientsById = {} }) {
               </defs>
               <CartesianGrid strokeDasharray="4 4" stroke="#F0EFEC" vertical={false} />
               <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#71717A" }} axisLine={{ stroke: "#E4DECF" }} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#71717A" }} axisLine={false} tickLine={false} width={60} />
+              <YAxis
+                tick={{ fontSize: 12, fill: "#71717A" }}
+                axisLine={false}
+                tickLine={false}
+                width={48}
+                tickFormatter={formatAxisValue}
+                allowDecimals={false}
+              />
               <Tooltip 
                 formatter={(v) => [money(v, symbol), "Revenue"]} 
                 contentStyle={{ 

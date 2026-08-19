@@ -1718,7 +1718,9 @@ textarea {
 }
 
 @media print {
-  .lg-sidebar {
+  .lg-sidebar,
+  .lg-mobile-menu-button,
+  .lg-mobile-sidebar-overlay {
     display: none !important;
   }
 }

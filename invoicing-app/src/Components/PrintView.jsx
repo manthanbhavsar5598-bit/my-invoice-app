@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { Printer, Download, ChevronLeft } from "lucide-react";
-import { computeTotals, isCommissionInvoice, invoiceTitleLabel, fmtDate, escapeHtml, money, amountInWords } from "../utils/helpers";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Printer, ChevronLeft } from "lucide-react";
+import { computeTotals, isCommissionInvoice, invoiceTitleLabel, fmtDate, money, amountInWords } from "../utils/helpers";
 
 // Helper to format ISO date strings (YYYY-MM-DD) into (DD/MM/YYYY) -> e.g., 10/06/2026
 function formatDate(dateStr) {
@@ -19,218 +19,6 @@ function formatDate(dateStr) {
 function fmtWeight(v) {
   const n = Number(v);
   return v !== "" && v != null && Number.isFinite(n) ? n.toFixed(2) : (v ?? "");
-}
-
-function buildInvoiceHTML(invoice, business, client) {
-  const totals = computeTotals(invoice);
-  const symbol = business.currencySymbol;
-  const grandTotal = Math.round(totals.total);
-  const roundOff = grandTotal - totals.total;
-  const isIntra = invoice.stateType === "intra";
-  const isInter = invoice.stateType === "inter";
-  const halfTax = totals.taxAmount / 2;
-  const terms = (business.terms || "").split("\n").filter(Boolean);
-  const rows = invoice.lineItems.length ? invoice.lineItems : [];
-  const MIN_ROWS = 10;
-  const blankRowCount = Math.max(0, MIN_ROWS - rows.length);
-
-  const commission = isCommissionInvoice(invoice);
-  const billTitleText = commission && invoice.billTitle ? invoice.billTitle : invoiceTitleLabel(invoice.billType);
-
-  const itemHeaderRow = commission
-    ? `<tr style="background:#F0DFC0;">
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:36px;">Sr.no</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:100px;white-space:nowrap;">Date</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;text-align:left;">Party name</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:80px;">Total weight</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:90px;">Commission</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:100px;">Amount in ${symbol}</th>
-      </tr>`
-    : `<tr style="background:#F0DFC0;">
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:36px;">Sr.no</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;text-align:left;">Description of goods</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:70px;">HSN code</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:60px;">Quantity</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:50px;">Unit</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:70px;">Rate</th>
-        <th style="border:1px solid #1F2A3C;padding:6px 4px;font-size:11px;font-weight:700;color:#000000;width:90px;">Amount</th>
-      </tr>`;
-
-  const itemRows = commission
-    ? rows.map((li, idx) => `
-      <tr>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${idx + 1}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;white-space:nowrap;">${formatDate(li.date)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;">${escapeHtml(li.partyName)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(fmtWeight(li.weight))}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(li.commission)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:right;font-family:'IBM Plex Mono',monospace;">${money((Number(li.weight) || 0) * (Number(li.commission) || 0), symbol)}</td>
-      </tr>`).join("")
-    : rows.map((li, idx) => `
-      <tr>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${idx + 1}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;">${escapeHtml(li.description)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(li.hsnCode)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(li.qty)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:center;">${escapeHtml(li.unit)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(li.price, symbol)}</td>
-        <td style="border:1px solid #1F2A3C;padding:6px 4px;font-size:12px;font-weight:600;color:#000000;text-align:right;font-family:'IBM Plex Mono',monospace;">${money((Number(li.qty) || 0) * (Number(li.price) || 0), symbol)}</td>
-      </tr>`).join("");
-
-  const blankCols = commission ? 6 : 7;
-  const blankRows = blankRowCount > 0
-    ? `<tr><td colspan="${blankCols}" style="border:1px solid #1F2A3C;border-top:none;height:${blankRowCount * 26}px;">&nbsp;</td></tr>`
-    : "";
-
-  const gstRows = isIntra
-    ? `<tr style="background:#FBEEDD;">
-        <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;">SGST ${(Number(invoice.taxRate) / 2).toFixed(1)}%</td>
-        <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(halfTax, symbol)}</td>
-      </tr>
-      <tr style="background:#FBEEDD;">
-        <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;">CGST ${(Number(invoice.taxRate) / 2).toFixed(1)}%</td>
-        <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(halfTax, symbol)}</td>
-      </tr>`
-    : isInter
-    ? `<tr style="background:#FBEEDD;">
-        <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;">IGST ${Number(invoice.taxRate).toFixed(1)}%</td>
-        <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(totals.taxAmount, symbol)}</td>
-      </tr>`
-    : "";
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>${escapeHtml(invoice.number)}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
-  * { box-sizing: border-box; }
-  body { font-family: 'Inter', sans-serif; color: #000000; background: #fff; margin: 0; padding: 24px; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
-  .toolbar { display: flex; gap: 10px; margin-bottom: 16px; }
-  .toolbar button { font-family: 'Inter', sans-serif; border: 1px solid #1F2A3C; background: #1F2A3C; color: #F7F3EA; padding: 9px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .sheet { max-width: 900px; margin: 0 auto; border: 1px solid #1F2A3C; }
-  table { width: 100%; border-collapse: collapse; }
-  @media print {
-    @page { size: auto; margin: 0 !important; }
-    .toolbar { display: none; }
-    body { padding: 1.5cm !important; margin: 0 !important; }
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-  }
-</style>
-</head>
-<body>
-  <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
-  <div class="sheet">
-    <div style="text-align:center;font-weight:700;font-size:13px;letter-spacing:0.06em;padding:6px 0;border-bottom:1px solid #1F2A3C;color:#8B0000;">
-      JAY SWAMINARAYAN
-    </div>
-    <div style="background:#fff;border-bottom:1px solid #1F2A3C;padding:12px 16px;text-align:center;">
-      <span style="font-family:'Zilla Slab',serif;font-size:22px;font-weight:700;background:#F5D98C;padding:3px 14px;display:block;margin-left:-16px;margin-right:-16px;color:#000000;">${escapeHtml(business.name)}</span>
-      <div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:6px;white-space:pre-line;color:#000000;">${escapeHtml(business.address)}</div>
-      ${business.panNumber && business.panNumber.trim() ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:4px;color:#000000;">PAN: ${escapeHtml(business.panNumber)}</div>` : ""}
-      ${business.gstNumber ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:4px;color:#000000;">GSTIN: ${escapeHtml(business.gstNumber)}</div>` : ""}
-      ${business.phone ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:3px;color:#000000;">Mobile: ${escapeHtml(business.phone)}</div>` : ""}
-      ${business.email ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;margin-top:3px;color:#000000;">Email: ${escapeHtml(business.email)}</div>` : ""}
-    </div>
-    <div style="text-align:center;font-weight:700;font-size:13px;letter-spacing:0.08em;padding:6px 0;border-bottom:1px solid #1F2A3C;background:${commission ? "transparent" : "#F7F3EA"};color:#000000;">
-      ${escapeHtml(billTitleText.toUpperCase())}
-    </div>
-
-    ${commission ? `
-    <div style="display:grid;grid-template-columns:1fr 1fr;">
-      <div style="border:1px solid #1F2A3C;border-right:0;padding:7px 8px;font-size:15px;font-weight:800;color:#000000;"><b>Invoice no:</b> ${escapeHtml(invoice.number)}</div>
-      <div style="border:1px solid #1F2A3C;border-left:0;padding:7px 8px;font-size:15px;font-weight:800;color:#000000;text-align:right;"><b>Date:</b> ${fmtDate(invoice.issueDate)}</div>
-    </div>` : `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;">
-      <div style="border:1px solid #1F2A3C;border-right:0;padding:7px 8px;font-size:15px;font-weight:800;color:#000000;"><b>Invoice no:</b> ${escapeHtml(invoice.number)}</div>
-      <div style="border:1px solid #1F2A3C;border-left:0;border-right:0;padding:7px 8px;font-size:15px;font-weight:800;color:#000000;text-align:center;"><b>State:</b> ${isIntra ? "Intra-state" : isInter ? "Inter-state" : "N/A"}</div>
-      <div style="border:1px solid #1F2A3C;border-left:0;padding:7px 8px;font-size:15px;font-weight:800;color:#000000;text-align:right;"><b>Date:</b> ${fmtDate(invoice.issueDate)}</div>
-    </div>`}
-
-    ${(!commission && invoice.shipDispatchType && invoice.shipDispatchName) ? `
-    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #1F2A3C;">
-      <div style="border-right:1px solid #1F2A3C;">
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;"><b>Bill to:</b> ${escapeHtml(client?.name || "—")}</div>
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;white-space:pre-line;"><b>Address:</b> ${escapeHtml(client?.address)}</div>
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;"><b>GST no:</b> ${escapeHtml(client?.gstNumber || "—")}</div>
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;"><b>State code:</b> ${escapeHtml(client?.stateCode || "—")}</div>
-      </div>
-      <div>
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;"><b>${invoice.shipDispatchType === "shipTo" ? "Ship to:" : "Dispatch from:"}</b> ${escapeHtml(invoice.shipDispatchName)}</div>
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;white-space:pre-line;"><b>Address:</b> ${escapeHtml(invoice.shipDispatchAddress)}</div>
-        <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;"><b>GST no:</b> ${escapeHtml(invoice.shipDispatchGst || "—")}</div>
-      </div>
-    </div>` : `
-    <div style="border-top:1px solid #1F2A3C;">
-      <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;"><b>${commission ? "Party name:" : "Bill to:"}</b> ${escapeHtml(client?.name || "—")}</div>
-      <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;white-space:pre-line;"><b>Address:</b> ${escapeHtml(client?.address)}</div>
-      <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;"><b>GST no:</b> ${escapeHtml(client?.gstNumber || "—")}</div>
-      <div style="padding:7px 8px;font-size:15px;font-weight:800;color:#000000;"><b>State code:</b> ${escapeHtml(client?.stateCode || "—")}</div>
-    </div>`}
-
-    ${(invoice.notes && invoice.notes.trim()) ? `
-    <div style="border-top:1px solid #1F2A3C;">
-      <div style="padding:6px 8px;font-size:12px;font-weight:600;color:#000000;white-space:pre-line;">${escapeHtml(invoice.notes)}</div>
-    </div>` : ""}
-
-    ${(!commission && (invoice.transportName || invoice.vehicleNo)) ? `
-    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #1F2A3C;">
-      <div style="border:1px solid #1F2A3C;border-right:0;padding:7px 8px;font-size:14px;font-weight:700;color:#000000;"><b>Transport details:</b> ${escapeHtml(invoice.transportName || "—")}</div>
-      <div style="border:1px solid #1F2A3C;border-left:0;padding:7px 8px;font-size:14px;font-weight:700;color:#000000;"><b>Vehicle no:</b> ${escapeHtml(invoice.vehicleNo || "—")}</div>
-    </div>` : ""}
-
-    <table style="border-top:1px solid #1F2A3C;">
-      <thead>${itemHeaderRow}</thead>
-      <tbody>${itemRows}${blankRows}</tbody>
-    </table>
-
-    <div style="display:grid;grid-template-columns:1.4fr 1fr;">
-      <div style="border-right:1px solid #1F2A3C;">
-        <!-- Amount in Words -->
-        <div style="padding:9px 10px;font-size:15px;font-weight:800;color:#000000;border-bottom:1px solid #1F2A3C;">${escapeHtml(amountInWords(grandTotal, "Rupees"))}</div>
-        
-        <!-- Bank Details -->
-        <div style="padding:9px 10px;border-bottom:1px solid #1F2A3C;color:#000000;font-weight:700;">
-          <div style="font-weight:800;font-size:15px;margin-bottom:5px;color:#000000;">Bank details</div>
-          <div style="font-size:14px;font-weight:700;color:#000000;">Bank name: ${escapeHtml(business.bankName || "—")}</div>
-          <div style="font-size:14px;font-weight:700;color:#000000;">Branch name: ${escapeHtml(business.branchName || "—")}</div>
-          <div style="font-size:14px;font-weight:700;color:#000000;">A/C no: ${escapeHtml(business.accountNo || "—")}</div>
-          <div style="font-size:14px;font-weight:700;color:#000000;">IFSC code: ${escapeHtml(business.ifscCode || "—")}</div>
-        </div>
-        
-        <!-- Terms & Conditions -->
-        <div style="padding:8px 10px;">
-          <div style="font-weight:800;font-size:15px;margin-bottom:5px;color:#000000;">Terms &amp; conditions</div>
-          ${terms.map((t) => `<div style="font-size:13.5px;font-weight:600;color:#000000;margin-bottom:3px;">${escapeHtml(t)}</div>`).join("")}
-        </div>
-      </div>
-      <div>
-        <table>
-          <tbody>
-            <tr style="background:#FBEEDD;">
-              <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;">Sub total</td>
-              <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(totals.subtotal, symbol)}</td>
-            </tr>
-            ${gstRows}
-            <tr style="background:#FBEEDD;">
-              <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;">Round off</td>
-              <td style="padding:7px 10px;font-size:15px;font-weight:700;color:#000000;border-bottom:1px solid #1F2A3C;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(roundOff, symbol)}</td>
-            </tr>
-            <tr style="background:#F5D98C;">
-              <td style="padding:9px 10px;font-size:16px;font-weight:800;color:#000000;">Grand total</td>
-              <td style="padding:9px 10px;font-size:16px;font-weight:800;color:#000000;text-align:right;font-family:'IBM Plex Mono',monospace;">${money(grandTotal, symbol)}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div style="border-top:1px solid #1F2A3C;padding:8px 10px 40px;">
-          <div style="font-weight:700;font-size:12px;color:#000000;">Signature &amp; stamp</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
 }
 
 function Cell({ children, style }) {
@@ -266,45 +54,95 @@ export default function PrintView({ invoice, business, client, onClose }) {
     }
   }, []);
 
-  function downloadStandaloneHTML() {
-    const html = buildInvoiceHTML(invoice, business, client);
-    const blob = new Blob([html], { type: "text/html;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${invoice.number || "invoice"}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  // Fit-to-one-page: invoices vary a lot in length (line item count,
+  // remarks, terms & conditions), so a fixed font/padding can't guarantee
+  // everything lands on a single A4 page — and just as often, a short
+  // invoice ends well before the page does, leaving a big blank gap at
+  // the bottom instead of actually using the paper. The scale factor
+  // below handles both directions: it shrinks content that's too tall to
+  // fit, and stretches content that's shorter than the page so it fills
+  // it properly. It's computed ahead of time (on mount, once fonts finish
+  // loading, and again right before printing as a safety re-check) and
+  // stored as a CSS custom property, applied only inside `@media print`
+  // via the CSS `zoom` property below. zoom (not transform) is used
+  // deliberately: transform is a paint-only effect that doesn't change
+  // how much vertical space an element claims in the page's layout flow,
+  // so Chrome's print pagination ignores it and still breaks the page at
+  // the original, unscaled height. zoom genuinely shrinks or grows the
+  // element's real layout size, so pagination correctly sees the true
+  // final size either way. This only ever touches presentation, never
+  // invoice data or totals.
+  const sheetRef = useRef(null);
+  const [printVars, setPrintVars] = useState({ "--print-scale": 1 });
+
+  useLayoutEffect(() => {
+    // ~287mm x 200mm usable area on A4 with the 0.5cm body padding below,
+    // converted to CSS px at 96dpi, with only a hair of safety margin
+    // (a 0.1% shave on the final scale) to absorb font-metric / rounding
+    // differences across browsers — zoom is precise, so it doesn't need
+    // the larger buffer the old transform-based approach needed.
+    const USABLE_HEIGHT_PX = 1080;
+    const USABLE_WIDTH_PX = 750;
+    // Cap how far a short invoice can be stretched up, so a near-empty
+    // invoice doesn't blow up into oversized, odd-looking text — this
+    // still lets a normal invoice fill the page, just not without limit.
+    const MAX_STRETCH = 1.35;
+
+    function measure() {
+      const sheet = sheetRef.current;
+      if (!sheet) return;
+      const naturalHeight = sheet.scrollHeight;
+      const naturalWidth = sheet.scrollWidth;
+      if (!naturalHeight || !naturalWidth) return;
+      // No longer capped at 1: content shorter than the page is scaled UP
+      // to fill it (instead of leaving a large blank gap at the bottom),
+      // and content taller than the page is still scaled down to fit, in
+      // both cases keeping every font size, padding, and proportion in
+      // the same ratio to every other.
+      const rawScale = Math.min(USABLE_HEIGHT_PX / naturalHeight, USABLE_WIDTH_PX / naturalWidth);
+      const scale = Math.min(rawScale, MAX_STRETCH) * 0.999;
+      setPrintVars({ "--print-scale": scale });
+    }
+
+    measure();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure);
+    }
+    window.addEventListener("beforeprint", measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.removeEventListener("beforeprint", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [invoice, business, client]);
 
   return (
     <div>
       <style>{`
         @media print {
-          @page { size: auto; margin: 0 !important; }
-          body { padding: 1.5cm !important; margin: 0 !important; }
+          @page { size: A4; margin: 0; }
+          body { padding: 0.5cm !important; margin: 0 !important; }
           .lg-noprint { display: none !important; }
           .lg-print-scroll { overflow: visible !important; width: auto !important; }
+          .lg-print-area {
+            zoom: var(--print-scale, 1);
+            page-break-inside: avoid;
+          }
+          .lg-print-area tr { page-break-inside: avoid; }
         }
       `}</style>
       <div className="lg-noprint" style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
         <button className="lg-btn" onClick={() => window.print()}><Printer size={14} /> Print / Save as PDF</button>
-        <button className="lg-btn-ghost" onClick={downloadStandaloneHTML}><Download size={14} /> Download printable file</button>
         <button className="lg-btn-ghost" onClick={onClose}><ChevronLeft size={14} /> Back</button>
       </div>
-      <div className="lg-noprint" style={{ fontSize: 12, fontWeight: 600, color: "#000000", marginBottom: 16, maxWidth: 500 }}>
-        If the print button above doesn't open a dialog, use "Download printable file" — open the downloaded file in your browser and print or save it as a PDF from there.
-      </div>
 
-      <div className="lg-print-scroll resp-scroll-x" ref={scrollRef}>
-      <div className="lg-print-area" style={{ fontFamily: "Inter, sans-serif", color: "#000000", background: "#fff", maxWidth: 900, minWidth: 620, margin: "0 auto", border: "1px solid #1F2A3C" }}>
-        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", padding: "6px 0", borderBottom: "1px solid #1F2A3C", color: "#8B0000" }}>
+      <div className="lg-print-scroll resp-scroll-x" ref={scrollRef} style={printVars}>
+      <div className="lg-print-area" ref={sheetRef} style={{ fontFamily: "Inter, sans-serif", color: "#000000", background: "#fff", maxWidth: 900, minWidth: 620, margin: "0 auto", border: "1px solid #1F2A3C" }}>
+        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", padding: "4px 0", borderBottom: "1px solid #1F2A3C", color: "#8B0000" }}>
           JAY SWAMINARAYAN
         </div>
 
-        <div style={{ background: "#fff", borderBottom: "1px solid #1F2A3C", padding: "12px 16px", textAlign: "center" }}>
+        <div style={{ background: "#fff", borderBottom: "1px solid #1F2A3C", padding: "8px 14px", textAlign: "center" }}>
           <span className="lg-display" style={{ fontSize: 22, fontWeight: 700, background: "#F5D98C", padding: "3px 14px", display: "block", marginLeft: -16, marginRight: -16, color: "#000000" }}>{business.name}</span>
           <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 6, whiteSpace: "pre-line", color: "#000000" }}>{business.address}</div>
           {business.panNumber && business.panNumber.trim() && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 4, color: "#000000" }}>PAN: {business.panNumber}</div>}
@@ -312,7 +150,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
           {business.phone && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 3, color: "#000000" }}>Mobile: {business.phone}</div>}
           {business.email && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 3, color: "#000000" }}>Email: {business.email}</div>}
         </div>
-        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", padding: "6px 0", borderBottom: "1px solid #1F2A3C", background: isCommissionInvoice(invoice) ? "transparent" : "#F7F3EA", color: "#000000" }}>
+        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", padding: "5px 0", borderBottom: "1px solid #1F2A3C", background: isCommissionInvoice(invoice) ? "transparent" : "#F7F3EA", color: "#000000" }}>
           {billTitleText.toUpperCase()}
         </div>
 
@@ -434,12 +272,12 @@ export default function PrintView({ invoice, business, client, onClose }) {
         <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr" }}>
           <div style={{ borderRight: "1px solid #1F2A3C" }}>
             {/* Amount in Words */}
-            <div style={{ padding: "8px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>
+            <div style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>
               {amountInWords(grandTotal, "Rupees")}
             </div>
 
             {/* Bank Details */}
-            <div style={{ padding: "8px 10px", borderBottom: "1px solid #1F2A3C" }}>
+            <div style={{ padding: "6px 10px", borderBottom: "1px solid #1F2A3C" }}>
               <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: "#000000" }}>Bank details</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#000000" }}>Bank name: {business.bankName || "—"}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#000000" }}>Branch name: {business.branchName || "—"}</div>
@@ -448,8 +286,8 @@ export default function PrintView({ invoice, business, client, onClose }) {
             </div>
 
             {/* Terms & Conditions */}
-            <div style={{ padding: "8px 10px" }}>
-              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: "#000000" }}>Terms & conditions</div>
+            <div style={{ padding: "6px 10px" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 3, color: "#000000" }}>Terms & conditions</div>
               {terms.map((t, idx) => (
                 <div key={idx} style={{ fontSize: 12.5, fontWeight: 600, color: "#000000", marginBottom: 2 }}>{t}</div>
               ))}
@@ -502,7 +340,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
                 </tr>
               </tbody>
             </table>
-            <div style={{ borderTop: "1px solid #1F2A3C", padding: "8px 10px 40px" }}>
+            <div style={{ borderTop: "1px solid #1F2A3C", padding: "6px 10px 22px" }}>
               <div style={{ fontWeight: 700, fontSize: 12, color: "#000000" }}>Signature &amp; stamp</div>
             </div>
           </div>

@@ -12,6 +12,7 @@ const companyProfileSchema = new mongoose.Schema(
     address: { type: String, trim: true },
     gstNumber: { type: String, trim: true },
     panNumber: { type: String, trim: true },
+    invoicePrefix: { type: String, trim: true },
     currencySymbol: { type: String, trim: true, default: '₹' },
     bankName: { type: String, trim: true },
     branchName: { type: String, trim: true },

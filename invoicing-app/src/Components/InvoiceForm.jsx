@@ -108,7 +108,15 @@ export default function InvoiceForm({ data, onSave }) {
         )}
         <div style={{ marginBottom: 12 }}>
           <label style={{ fontSize: 12, color: "var(--ink-soft)" }}>Company profile</label>
-          <select value={inv.companyProfileId} onChange={(e) => setInv({ ...inv, companyProfileId: e.target.value })}>
+          <select value={inv.companyProfileId} onChange={(e) => {
+            const profileId = e.target.value;
+            const profile = data.profiles.find((p) => p.id === profileId);
+            // Only prefill on a brand-new invoice, and only if the number
+            // field hasn't been typed into yet, so switching profiles never
+            // overwrites a number the user already entered/edited.
+            const shouldPrefill = isNew && !inv.number && profile?.invoicePrefix;
+            setInv({ ...inv, companyProfileId: profileId, number: shouldPrefill ? profile.invoicePrefix : inv.number });
+          }}>
             <option value="">Select a company profile…</option>
             {data.profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>

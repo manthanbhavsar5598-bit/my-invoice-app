@@ -175,6 +175,8 @@ const mapProfile = (
     profile.gstNumber || "",
   panNumber:
     profile.panNumber || "",
+  invoicePrefix:
+    profile.invoicePrefix || "",
   currencySymbol:
     profile.currencySymbol ||
     "₹",

@@ -12,6 +12,7 @@ import {
   Save,
   X,
   FileText,
+  ListOrdered,
 } from "lucide-react";
 import { uid } from "../utils/helpers";
 
@@ -31,6 +32,8 @@ const emptyProfile = () => ({
 
   gstNumber: "",
   panNumber: "",
+
+  invoicePrefix: "",
 
   currencySymbol: "₹",
 
@@ -821,6 +824,15 @@ export default function CompanyProfiles({
                   onChange={setField("name")}
                   placeholder="Enter company name"
                   required
+                />
+
+
+                <Field
+                  label="Invoice Prefix"
+                  value={form.invoicePrefix}
+                  onChange={setField("invoicePrefix")}
+                  placeholder="e.g. NNC26-27/"
+                  icon={ListOrdered}
                 />
 
 

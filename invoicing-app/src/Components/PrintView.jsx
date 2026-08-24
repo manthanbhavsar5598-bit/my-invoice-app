@@ -22,7 +22,7 @@ function fmtWeight(v) {
 }
 
 function Cell({ children, style }) {
-  return <div style={{ border: "1px solid #1F2A3C", padding: "6px 8px", fontSize: 12, color: "#000000", ...style }}>{children}</div>;
+  return <div style={{ border: "1px solid #000000", padding: "6px 8px", fontSize: 12, color: "#000000", ...style }}>{children}</div>;
 }
 
 export default function PrintView({ invoice, business, client, onClose }) {
@@ -141,98 +141,98 @@ export default function PrintView({ invoice, business, client, onClose }) {
       </div>
 
       <div className="lg-print-scroll resp-scroll-x" ref={scrollRef} style={printVars}>
-      <div className="lg-print-area" ref={sheetRef} style={{ fontFamily: "Inter, sans-serif", color: "#000000", background: "#fff", maxWidth: 900, minWidth: 620, margin: "0 auto", border: "1px solid #1F2A3C" }}>
-        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", padding: "4px 0", borderBottom: "1px solid #1F2A3C", color: "#8B0000" }}>
+      <div className="lg-print-area" ref={sheetRef} style={{ fontFamily: "Inter, sans-serif", color: "#000000", background: "#fff", maxWidth: 900, minWidth: 620, margin: "0 auto", border: "1px solid #000000" }}>
+        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", padding: "4px 0", borderBottom: "1px solid #000000", color: "#8B0000" }}>
           JAY SWAMINARAYAN
         </div>
 
-        <div style={{ background: "#fff", borderBottom: "1px solid #1F2A3C", padding: "8px 14px", textAlign: "center" }}>
-          <span className="lg-display" style={{ fontSize: 22, fontWeight: 700, background: "#F5D98C", padding: "3px 14px", display: "block", marginLeft: -16, marginRight: -16, color: "#000000" }}>{business.name}</span>
+        <div style={{ background: "#fff", borderBottom: "1px solid #000000", padding: "8px 14px", textAlign: "center" }}>
+          <span className="lg-display" style={{ fontSize: 22, fontWeight: 700, background: "#F5D98C", padding: "3px 14px", display: "block", marginLeft: -14, marginRight: -14, color: "#000000" }}>{business.name}</span>
           <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 6, whiteSpace: "pre-line", color: "#000000" }}>{business.address}</div>
           {business.panNumber && business.panNumber.trim() && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 4, color: "#000000" }}>PAN: {business.panNumber}</div>}
           {business.gstNumber && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 4, color: "#000000" }}>GSTIN: {business.gstNumber}</div>}
           {business.phone && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 3, color: "#000000" }}>Mobile: {business.phone}</div>}
           {business.email && <div style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", marginTop: 3, color: "#000000" }}>Email: {business.email}</div>}
         </div>
-        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", padding: "5px 0", borderBottom: "1px solid #1F2A3C", background: isCommissionInvoice(invoice) ? "transparent" : "#F7F3EA", color: "#000000" }}>
+        <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", padding: "5px 0", borderBottom: "1px solid #000000", background: isCommissionInvoice(invoice) ? "transparent" : "#F7F3EA", color: "#000000" }}>
           {billTitleText.toUpperCase()}
         </div>
 
         {isCommissionInvoice(invoice) ? (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-            <Cell style={{ borderRight: 0, fontSize: 13, fontWeight: 700 }}><b>Invoice no:</b> {invoice.number}</Cell>
-            <Cell style={{ borderLeft: 0, textAlign: "right", fontSize: 13, fontWeight: 700 }}><b>Date:</b> {fmtDate(invoice.issueDate)}</Cell>
+            <Cell style={{ border: "none", borderRight: "1px solid #000000", fontSize: 13, fontWeight: 700 }}><b>Invoice no:</b> {invoice.number}</Cell>
+            <Cell style={{ border: "none", textAlign: "right", fontSize: 13, fontWeight: 700 }}><b>Date:</b> {fmtDate(invoice.issueDate)}</Cell>
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
-            <Cell style={{ borderRight: 0, fontSize: 14, fontWeight: 700 }}><b>Invoice no:</b> {invoice.number}</Cell>
-            <Cell style={{ borderRight: 0, borderLeft: 0, textAlign: "center", fontSize: 14, fontWeight: 700 }}>
+            <Cell style={{ border: "none", borderRight: "1px solid #000000", fontSize: 14, fontWeight: 700 }}><b>Invoice no:</b> {invoice.number}</Cell>
+            <Cell style={{ border: "none", borderRight: "1px solid #000000", textAlign: "center", fontSize: 14, fontWeight: 700 }}>
               <b>State:</b> {isIntra ? "Intra-state" : isInter ? "Inter-state" : "N/A"}
             </Cell>
-            <Cell style={{ borderLeft: 0, textAlign: "right", fontSize: 14, fontWeight: 700 }}><b>Date:</b> {fmtDate(invoice.issueDate)}</Cell>
+            <Cell style={{ border: "none", textAlign: "right", fontSize: 14, fontWeight: 700 }}><b>Date:</b> {fmtDate(invoice.issueDate)}</Cell>
           </div>
         )}
 
         {!isCommissionInvoice(invoice) && invoice.shipDispatchType && invoice.shipDispatchName ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #1F2A3C" }}>
-            <div style={{ borderRight: "1px solid #1F2A3C" }}>
-              <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700 }}><b>Bill to:</b> {client?.name || "—"}</Cell>
-              <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700, whiteSpace: "pre-line" }}><b>Address:</b> {client?.address}</Cell>
-              <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700 }}><b>GST no:</b> {client?.gstNumber || "—"}</Cell>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #000000" }}>
+            <div style={{ borderRight: "1px solid #000000" }}>
+              <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700 }}><b>Bill to:</b> {client?.name || "—"}</Cell>
+              <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700, whiteSpace: "pre-line" }}><b>Address:</b> {client?.address}</Cell>
+              <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700 }}><b>GST no:</b> {client?.gstNumber || "—"}</Cell>
               <Cell style={{ border: "none", fontSize: 14, fontWeight: 700 }}><b>State code:</b> {client?.stateCode || "—"}</Cell>
             </div>
             <div>
-              <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700 }}>
+              <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700 }}>
                 <b>{invoice.shipDispatchType === "shipTo" ? "Ship to:" : "Dispatch from:"}</b> {invoice.shipDispatchName}
               </Cell>
-              <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700, whiteSpace: "pre-line" }}><b>Address:</b> {invoice.shipDispatchAddress}</Cell>
+              <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700, whiteSpace: "pre-line" }}><b>Address:</b> {invoice.shipDispatchAddress}</Cell>
               <Cell style={{ border: "none", fontSize: 14, fontWeight: 700 }}><b>GST no:</b> {invoice.shipDispatchGst || "—"}</Cell>
             </div>
           </div>
         ) : (
-          <div style={{ borderTop: "1px solid #1F2A3C" }}>
-            <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700 }}>
+          <div style={{ borderTop: "1px solid #000000" }}>
+            <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700 }}>
               <b>{isCommissionInvoice(invoice) ? "Party name:" : "Bill to:"}</b> {client?.name || "—"}
             </Cell>
-            <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700, whiteSpace: "pre-line" }}><b>Address:</b> {client?.address}</Cell>
-            <Cell style={{ border: "none", borderBottom: "1px solid #1F2A3C", fontSize: 14, fontWeight: 700 }}><b>GST no:</b> {client?.gstNumber || "—"}</Cell>
+            <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700, whiteSpace: "pre-line" }}><b>Address:</b> {client?.address}</Cell>
+            <Cell style={{ border: "none", borderBottom: "1px solid #000000", fontSize: 14, fontWeight: 700 }}><b>GST no:</b> {client?.gstNumber || "—"}</Cell>
             <Cell style={{ border: "none", fontSize: 14, fontWeight: 700 }}><b>State code:</b> {client?.stateCode || "—"}</Cell>
           </div>
         )}
 
         {invoice.notes && invoice.notes.trim() && (
-          <div style={{ borderTop: "1px solid #1F2A3C" }}>
+          <div style={{ borderTop: "1px solid #000000" }}>
             <Cell style={{ border: "none", fontSize: 12, fontWeight: 600, whiteSpace: "pre-line" }}>{invoice.notes}</Cell>
           </div>
         )}
 
         {!isCommissionInvoice(invoice) && (invoice.transportName || invoice.vehicleNo) && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #1F2A3C" }}>
-            <Cell style={{ borderRight: 0, fontSize: 14, fontWeight: 700 }}><b>Transport details:</b> {invoice.transportName || "—"}</Cell>
-            <Cell style={{ borderLeft: 0, fontSize: 14, fontWeight: 700 }}><b>Vehicle no:</b> {invoice.vehicleNo || "—"}</Cell>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #000000" }}>
+            <Cell style={{ border: "none", borderRight: "1px solid #000000", fontSize: 14, fontWeight: 700 }}><b>Transport details:</b> {invoice.transportName || "—"}</Cell>
+            <Cell style={{ border: "none", fontSize: 14, fontWeight: 700 }}><b>Vehicle no:</b> {invoice.vehicleNo || "—"}</Cell>
           </div>
         )}
 
-        <table style={{ borderTop: "1px solid #1F2A3C", width: "100%", borderCollapse: "collapse" }}>
+        <table style={{ borderTop: "1px solid #000000", width: "100%", borderCollapse: "collapse" }}>
           <thead>
             {isCommissionInvoice(invoice) ? (
               <tr style={{ background: "#F0DFC0" }}>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 36 }}>Sr.no</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 100, whiteSpace: "nowrap" }}>Date</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", textAlign: "left" }}>Party name</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 80 }}>Total weight</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 90 }}>Commission</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 100 }}>Amount in {symbol}</th>
+                <th style={{ border: "1px solid #000000", borderLeft: "none", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 36 }}>Sr.no</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 100, whiteSpace: "nowrap" }}>Date</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", textAlign: "left" }}>Party name</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 80 }}>Total weight</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 90 }}>Commission</th>
+                <th style={{ border: "1px solid #000000", borderRight: "none", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 100 }}>Amount in {symbol}</th>
               </tr>
             ) : (
               <tr style={{ background: "#F0DFC0" }}>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 36 }}>Sr.no</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", textAlign: "left" }}>Description of goods</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 70 }}>HSN code</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 60 }}>Quantity</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 50 }}>Unit</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 70 }}>Rate</th>
-                <th style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 90 }}>Amount</th>
+                <th style={{ border: "1px solid #000000", borderLeft: "none", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 36 }}>Sr.no</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", textAlign: "left" }}>Description of goods</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 70 }}>HSN code</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 60 }}>Quantity</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 50 }}>Unit</th>
+                <th style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 70 }}>Rate</th>
+                <th style={{ border: "1px solid #000000", borderRight: "none", padding: "6px 4px", fontSize: 11, fontWeight: 700, color: "#000000", width: 90 }}>Amount</th>
               </tr>
             )}
           </thead>
@@ -240,32 +240,32 @@ export default function PrintView({ invoice, business, client, onClose }) {
             {isCommissionInvoice(invoice)
               ? rows.map((li, idx) => (
                   <tr key={li.id || idx}>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{idx + 1}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center", whiteSpace: "nowrap" }}>{formatDate(li.date)}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000" }}>{li.partyName}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{fmtWeight(li.weight)}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.commission}</td>
-                    <td className="lg-mono" style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>
+                    <td style={{ border: "1px solid #000000", borderLeft: "none", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{idx + 1}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center", whiteSpace: "nowrap" }}>{formatDate(li.date)}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000" }}>{li.partyName}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{fmtWeight(li.weight)}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.commission}</td>
+                    <td className="lg-mono" style={{ border: "1px solid #000000", borderRight: "none", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>
                       {money((Number(li.weight) || 0) * (Number(li.commission) || 0), symbol)}
                     </td>
                   </tr>
                 ))
               : rows.map((li, idx) => (
                   <tr key={li.id || idx}>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{idx + 1}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000" }}>{li.description}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.hsnCode}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.qty}</td>
-                    <td style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.unit}</td>
-                    <td className="lg-mono" style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>{money(li.price, symbol)}</td>
-                    <td className="lg-mono" style={{ border: "1px solid #1F2A3C", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>
+                    <td style={{ border: "1px solid #000000", borderLeft: "none", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{idx + 1}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000" }}>{li.description}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.hsnCode}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.qty}</td>
+                    <td style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "center" }}>{li.unit}</td>
+                    <td className="lg-mono" style={{ border: "1px solid #000000", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>{money(li.price, symbol)}</td>
+                    <td className="lg-mono" style={{ border: "1px solid #000000", borderRight: "none", padding: "6px 4px", fontSize: 12, fontWeight: 600, color: "#000000", textAlign: "right" }}>
                       {money((Number(li.qty) || 0) * (Number(li.price) || 0), symbol)}
                     </td>
                   </tr>
                 ))}
             {blankRowCount > 0 && (
               <tr>
-                <td colSpan={isCommissionInvoice(invoice) ? 6 : 7} style={{ border: "1px solid #1F2A3C", borderTop: "none", height: blankRowCount * 26 }}>
+                <td colSpan={isCommissionInvoice(invoice) ? 6 : 7} style={{ border: "1px solid #000000", borderTop: "none", borderLeft: "none", borderRight: "none", height: blankRowCount * 26 }}>
                   &nbsp;
                 </td>
               </tr>
@@ -274,14 +274,14 @@ export default function PrintView({ invoice, business, client, onClose }) {
         </table>
 
         <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr" }}>
-          <div style={{ borderRight: "1px solid #1F2A3C" }}>
+          <div style={{ borderRight: "1px solid #000000" }}>
             {/* Amount in Words */}
-            <div style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>
+            <div style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000" }}>
               {amountInWords(grandTotal, "Rupees")}
             </div>
 
             {/* Bank Details */}
-            <div style={{ padding: "6px 10px", borderBottom: "1px solid #1F2A3C" }}>
+            <div style={{ padding: "6px 10px", borderBottom: "1px solid #000000" }}>
               <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: "#000000" }}>Bank details</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#000000" }}>Bank name: {business.bankName || "—"}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#000000" }}>Branch name: {business.branchName || "—"}</div>
@@ -301,22 +301,22 @@ export default function PrintView({ invoice, business, client, onClose }) {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>
                 <tr style={{ background: "#FBEEDD" }}>
-                  <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>Sub total</td>
-                  <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C", textAlign: "right" }}>
+                  <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000" }}>Sub total</td>
+                  <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000", textAlign: "right" }}>
                     {money(totals.subtotal, symbol)}
                   </td>
                 </tr>
                 {isIntra && (
                   <>
                     <tr style={{ background: "#FBEEDD" }}>
-                      <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>SGST {(Number(invoice.taxRate) / 2).toFixed(1)}%</td>
-                      <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C", textAlign: "right" }}>
+                      <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000" }}>SGST {(Number(invoice.taxRate) / 2).toFixed(1)}%</td>
+                      <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000", textAlign: "right" }}>
                         {money(halfTax, symbol)}
                       </td>
                     </tr>
                     <tr style={{ background: "#FBEEDD" }}>
-                      <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>CGST {(Number(invoice.taxRate) / 2).toFixed(1)}%</td>
-                      <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C", textAlign: "right" }}>
+                      <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000" }}>CGST {(Number(invoice.taxRate) / 2).toFixed(1)}%</td>
+                      <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000", textAlign: "right" }}>
                         {money(halfTax, symbol)}
                       </td>
                     </tr>
@@ -324,15 +324,15 @@ export default function PrintView({ invoice, business, client, onClose }) {
                 )}
                 {isInter && (
                   <tr style={{ background: "#FBEEDD" }}>
-                    <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>IGST {Number(invoice.taxRate).toFixed(1)}%</td>
-                    <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C", textAlign: "right" }}>
+                    <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000" }}>IGST {Number(invoice.taxRate).toFixed(1)}%</td>
+                    <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000", textAlign: "right" }}>
                       {money(totals.taxAmount, symbol)}
                     </td>
                   </tr>
                 )}
                 <tr style={{ background: "#FBEEDD" }}>
-                  <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C" }}>Round off</td>
-                  <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #1F2A3C", textAlign: "right" }}>
+                  <td style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000" }}>Round off</td>
+                  <td className="lg-mono" style={{ padding: "6px 10px", fontSize: 14, fontWeight: 700, color: "#000000", borderBottom: "1px solid #000000", textAlign: "right" }}>
                     {money(roundOff, symbol)}
                   </td>
                 </tr>
@@ -344,7 +344,7 @@ export default function PrintView({ invoice, business, client, onClose }) {
                 </tr>
               </tbody>
             </table>
-            <div style={{ borderTop: "1px solid #1F2A3C", padding: "6px 10px 22px" }}>
+            <div style={{ borderTop: "1px solid #000000", padding: "6px 10px 22px" }}>
               <div style={{ fontWeight: 700, fontSize: 12, color: "#000000" }}>Signature &amp; stamp</div>
             </div>
           </div>
